@@ -220,18 +220,6 @@ export const categories = [
     description: "Instalações elétricas seguras",
     icon: "💡",
   },
-  {
-    id: "jardinagem",
-    name: "Jardinagem",
-    description: "Cuidado do seu jardim",
-    icon: "🌱",
-  },
-  {
-    id: "seguranca",
-    name: "Segurança",
-    description: "Equipamentos de proteção",
-    icon: "🛡️",
-  },
 ];
 
 export const getProductsByCategory = (categoryId: string) => {

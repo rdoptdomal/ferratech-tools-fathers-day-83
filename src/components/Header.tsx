@@ -17,9 +17,8 @@ const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
     { label: "Ferramentas Elétricas", href: "/products/ferramentas-eletricas", icon: "⚡" },
     { label: "Material de Construção", href: "/products/construcao", icon: "🏗️" },
     { label: "Material Elétrico", href: "/products/eletrica", icon: "💡" },
-    { label: "Jardinagem", href: "/products/jardinagem", icon: "🌱" },
-    { label: "Segurança", href: "/products/seguranca", icon: "🛡️" },
     { label: "Ofertas", href: "/ofertas", icon: "🔥" },
+    { label: "Sobre a Loja", href: "/sobre", icon: "ℹ️" },
   ];
 
   return (
@@ -78,12 +77,12 @@ const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
+            <Button variant="ghost" size="sm" className="hidden md:flex" onClick={() => window.location.href = '/auth'}>
               <User className="h-4 w-4 mr-2" />
               Entre ou Cadastre-se
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative" onClick={() => window.location.href = '/cart'}>
               <ShoppingCart className="h-5 w-5" />
               {cartItemsCount > 0 && (
                 <Badge
