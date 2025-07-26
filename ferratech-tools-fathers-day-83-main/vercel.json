@@ -16,11 +16,6 @@
     "VITE_GA_TRACKING_ID": "G-1234567890",
     "VITE_SITE_URL": "https://ferratech-tools.vercel.app"
   },
-  "functions": {
-    "src/api/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
