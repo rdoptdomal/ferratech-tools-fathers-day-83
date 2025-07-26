@@ -100,8 +100,9 @@ const Checkout = () => {
   };
 
   const validateForm = () => {
-    const { customer, shipping, payment } = form;
+    const { customer, shipping } = form;
     
+    // Validar dados pessoais
     if (!customer.name || !customer.email || !customer.phone || !customer.cpf) {
       toast({
         title: "Dados incompletos",
@@ -111,6 +112,7 @@ const Checkout = () => {
       return false;
     }
 
+    // Validar endereço de entrega
     if (!shipping.cep || !shipping.street || !shipping.number || !shipping.city || !shipping.state) {
       toast({
         title: "Endereço incompleto",
@@ -120,7 +122,9 @@ const Checkout = () => {
       return false;
     }
 
-    if (payment.method === "credit-card") {
+    // Validar dados do cartão apenas se o método for cartão de crédito
+    if (paymentMethod === "credit-card") {
+      const { payment } = form;
       if (!payment.cardNumber || !payment.cardHolder || !payment.cardExpiry || !payment.cardCvv) {
         toast({
           title: "Dados do cartão incompletos",
@@ -140,7 +144,7 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
-      // Preparar dados do pagamento
+      // Preparar dados base do pagamento
       const paymentData: BlackCatPaymentRequest = {
         amount: Math.round(total * 100), // BlackCat espera em centavos
         currency: "BRL",
@@ -162,14 +166,25 @@ const Checkout = () => {
           zip_code: form.shipping.cep.replace(/\D/g, "")
         },
         redirect_url: `${import.meta.env.VITE_SITE_URL}/checkout/callback`,
-        enable3DS: true
+        enable3DS: paymentMethod === "credit-card" // 3DS apenas para cartão
       };
 
-      // Adicionar dados do cartão se necessário
-      if (paymentMethod === "credit-card" && form.payment.cardNumber) {
+      // Configurar dados específicos por método de pagamento
+      if (paymentMethod === "credit-card") {
+        // Validar se todos os dados do cartão estão preenchidos
+        if (!form.payment.cardNumber || !form.payment.cardHolder || !form.payment.cardExpiry || !form.payment.cardCvv) {
+          toast({
+            title: "Dados do cartão incompletos",
+            description: "Preencha todos os dados do cartão de crédito",
+            variant: "destructive"
+          });
+          setIsProcessing(false);
+          return;
+        }
+
         paymentData.card_data = {
           number: form.payment.cardNumber.replace(/\s/g, ""),
-          holder_name: form.payment.cardHolder!,
+          holder_name: form.payment.cardHolder,
           expiration_month: form.payment.cardExpiry!.split("/")[0],
           expiration_year: "20" + form.payment.cardExpiry!.split("/")[1],
           cvv: form.payment.cardCvv!
@@ -206,32 +221,50 @@ const Checkout = () => {
         description: `ID do pedido: ${order.id}`,
       });
       
-      // Redirecionar baseado no método de pagamento e status
-      if (paymentMethod === "pix" && paymentResult.pix_details) {
-        navigate('/payment-pix', { 
-          state: { 
-            paymentResult, 
-            orderId: order.id,
-            qrCodeImage: paymentResult.pix_details.qr_code_image_base64,
-            qrCodeText: paymentResult.pix_details.qr_code_text
-          } 
-        });
-      } else if (paymentMethod === "credit-card") {
-        if (paymentResult.status === "authentication_required" && paymentResult.authentication_url) {
-          // Redirecionar para autenticação 3DS
-          window.location.href = paymentResult.authentication_url;
-        } else if (paymentResult.status === "paid") {
-          navigate('/order-success', { state: { orderId: order.id } });
-        } else {
-          navigate('/checkout/callback', { 
+      // Redirecionar baseado no método de pagamento
+      switch (paymentMethod) {
+        case "pix":
+          if (paymentResult.pix_details) {
+            navigate('/payment-pix', { 
+              state: { 
+                paymentResult, 
+                orderId: order.id,
+                qrCodeImage: paymentResult.pix_details.qr_code_image_base64,
+                qrCodeText: paymentResult.pix_details.qr_code_text
+              } 
+            });
+          } else {
+            navigate('/order-success', { state: { orderId: order.id } });
+          }
+          break;
+
+        case "credit-card":
+          if (paymentResult.status === "authentication_required" && paymentResult.authentication_url) {
+            // Redirecionar para autenticação 3DS
+            window.location.href = paymentResult.authentication_url;
+          } else if (paymentResult.status === "paid") {
+            navigate('/order-success', { state: { orderId: order.id } });
+          } else {
+            navigate('/checkout/callback', { 
+              state: { 
+                transactionId: paymentResult.transaction_id,
+                orderId: order.id 
+              } 
+            });
+          }
+          break;
+
+        case "boleto":
+          navigate('/payment-boleto', { 
             state: { 
-              transactionId: paymentResult.transaction_id,
+              paymentResult, 
               orderId: order.id 
             } 
           });
-        }
-      } else {
-        navigate('/order-success', { state: { orderId: order.id } });
+          break;
+
+        default:
+          navigate('/order-success', { state: { orderId: order.id } });
       }
 
     } catch (error: any) {
@@ -468,7 +501,7 @@ const Checkout = () => {
                 </CardContent>
               </Card>
 
-              {/* Método de Pagamento */}
+                                {/* Método de Pagamento */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -478,7 +511,7 @@ const Checkout = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg hover:border-primary transition-colors">
                       <RadioGroupItem value="credit-card" id="credit-card" />
                       <Label htmlFor="credit-card" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-2">
@@ -491,7 +524,7 @@ const Checkout = () => {
                       </Label>
                     </div>
                     
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg hover:border-primary transition-colors">
                       <RadioGroupItem value="pix" id="pix" />
                       <Label htmlFor="pix" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-2">
@@ -499,12 +532,12 @@ const Checkout = () => {
                           <span>PIX</span>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Aprovação instantânea
+                          Aprovação instantânea - Sem dados do cartão
                         </p>
                       </Label>
                     </div>
                     
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg hover:border-primary transition-colors">
                       <RadioGroupItem value="boleto" id="boleto" />
                       <Label htmlFor="boleto" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-2">
@@ -517,6 +550,44 @@ const Checkout = () => {
                       </Label>
                     </div>
                   </RadioGroup>
+
+                  {/* Informações específicas do método selecionado */}
+                  {paymentMethod === "pix" && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <QrCode className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-800">Pagamento PIX</span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        Após finalizar a compra, você receberá um QR Code para pagamento instantâneo via PIX.
+                        Não é necessário preencher dados do cartão.
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentMethod === "boleto" && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-blue-800">Boleto Bancário</span>
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        Após finalizar a compra, você receberá um boleto bancário com vencimento em 3 dias úteis.
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentMethod === "credit-card" && (
+                    <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="h-4 w-4 text-purple-600" />
+                        <span className="font-medium text-purple-800">Cartão de Crédito</span>
+                      </div>
+                      <p className="text-sm text-purple-700">
+                        Preencha os dados do seu cartão abaixo. Aceitamos parcelamento em até 12x sem juros.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Campos do Cartão de Crédito */}
                   {paymentMethod === "credit-card" && (
