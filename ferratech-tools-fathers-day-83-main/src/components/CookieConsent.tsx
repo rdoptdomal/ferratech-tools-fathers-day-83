@@ -5,6 +5,7 @@ import { X, Shield, Cookie } from "lucide-react";
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // Verificar se o usuário já aceitou os cookies
@@ -12,6 +13,7 @@ const CookieConsent = () => {
     if (!hasConsented) {
       setIsVisible(true);
     }
+    setIsInitialized(true);
   }, []);
 
   const handleAccept = () => {
@@ -24,7 +26,8 @@ const CookieConsent = () => {
     setIsVisible(false);
   };
 
-  if (!isVisible) {
+  // Não renderizar até que a verificação seja feita
+  if (!isInitialized || !isVisible) {
     return null;
   }
 

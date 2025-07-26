@@ -116,27 +116,64 @@ class BlackCatClient {
 
   async createPayment(paymentData: BlackCatPaymentRequest): Promise<BlackCatPaymentResponse> {
     try {
+      // Validar dados obrigatórios
+      if (!paymentData.amount || paymentData.amount <= 0) {
+        throw new Error('Valor do pagamento deve ser maior que zero');
+      }
+
+      if (!paymentData.customer.name || !paymentData.customer.email || !paymentData.customer.cpf) {
+        throw new Error('Dados do cliente são obrigatórios');
+      }
+
+      if (!paymentData.payment_method) {
+        throw new Error('Método de pagamento é obrigatório');
+      }
+
+      // Validar CPF (mínimo 11 dígitos)
+      const cpf = paymentData.customer.cpf.replace(/\D/g, '');
+      if (cpf.length < 11) {
+        throw new Error('CPF deve ter pelo menos 11 dígitos');
+      }
+
       // Preparar payload para BlackCatPagamentos
       const payload: BlackCatPayload = {
         amount: paymentData.amount,
         currency: paymentData.currency || 'BRL',
-        description: paymentData.description,
+        description: paymentData.description || 'Pagamento FerraTech',
         customer: {
-          name: paymentData.customer.name,
-          email: paymentData.customer.email,
-          phone: paymentData.customer.phone,
-          cpf: paymentData.customer.cpf.replace(/\D/g, '')
+          name: paymentData.customer.name.trim(),
+          email: paymentData.customer.email.trim(),
+          phone: paymentData.customer.phone.replace(/\D/g, ''),
+          cpf: cpf
         },
         payment_method: paymentData.payment_method,
         redirect_url: paymentData.redirect_url || `${import.meta.env.VITE_SITE_URL}/checkout/callback`,
-        enable3DS: paymentData.enable3DS || true
+        enable3DS: paymentData.enable3DS || false
       };
 
       // Adicionar dados do cartão se for pagamento com cartão
-      if (paymentData.payment_method === 'credit_card' && paymentData.card_data) {
+      if (paymentData.payment_method === 'credit_card') {
+        if (!paymentData.card_data) {
+          throw new Error('Dados do cartão são obrigatórios para pagamento com cartão');
+        }
+
+        // Validar dados do cartão
+        const cardNumber = paymentData.card_data.number.replace(/\s/g, '');
+        if (cardNumber.length < 13 || cardNumber.length > 19) {
+          throw new Error('Número do cartão inválido');
+        }
+
+        if (!paymentData.card_data.holder_name.trim()) {
+          throw new Error('Nome do titular é obrigatório');
+        }
+
+        if (!paymentData.card_data.cvv || paymentData.card_data.cvv.length < 3) {
+          throw new Error('CVV é obrigatório');
+        }
+
         payload.card = {
-          number: paymentData.card_data.number.replace(/\s/g, ''),
-          holder_name: paymentData.card_data.holder_name,
+          number: cardNumber,
+          holder_name: paymentData.card_data.holder_name.trim(),
           expiration_month: paymentData.card_data.expiration_month,
           expiration_year: paymentData.card_data.expiration_year,
           cvv: paymentData.card_data.cvv
@@ -146,26 +183,44 @@ class BlackCatClient {
 
       // Adicionar endereço de entrega se fornecido
       if (paymentData.shipping_address) {
+        if (!paymentData.shipping_address.street || !paymentData.shipping_address.city || !paymentData.shipping_address.state) {
+          throw new Error('Endereço de entrega incompleto');
+        }
+
         payload.shipping_address = {
-          street: paymentData.shipping_address.street,
-          number: paymentData.shipping_address.number,
-          complement: paymentData.shipping_address.complement,
-          neighborhood: paymentData.shipping_address.neighborhood,
-          city: paymentData.shipping_address.city,
-          state: paymentData.shipping_address.state,
+          street: paymentData.shipping_address.street.trim(),
+          number: paymentData.shipping_address.number.trim(),
+          complement: paymentData.shipping_address.complement?.trim() || '',
+          neighborhood: paymentData.shipping_address.neighborhood.trim(),
+          city: paymentData.shipping_address.city.trim(),
+          state: paymentData.shipping_address.state.trim(),
           zip_code: paymentData.shipping_address.zip_code.replace(/\D/g, '')
         };
       }
 
+      console.log('Enviando payload para BlackCat:', payload);
+
       const response = await axios.post(
         `${BLACKCAT_API_URL}/transactions`,
         payload,
-        { headers: this.getHeaders() }
+        { 
+          headers: this.getHeaders(),
+          timeout: 30000 // 30 segundos de timeout
+        }
       );
+
+      console.log('Resposta do BlackCat:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar pagamento:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Falha ao processar pagamento');
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Falha ao processar pagamento. Tente novamente.');
+      }
     }
   }
 
