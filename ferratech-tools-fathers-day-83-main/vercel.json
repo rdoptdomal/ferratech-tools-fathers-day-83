@@ -1,0 +1,43 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "https://ymxmdhshkwrgyvpvwmmg.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlteG1kaHNoa3dyZ3l2cHZ3bW1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4ODQ3MTUsImV4cCI6MjA2ODQ2MDcxNX0.UyWasAnU67wDmc62426uM1uf3XZxNHbKQqThpijTHKA",
+    "VITE_BLACKCAT_SECRET_KEY": "sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT",
+    "VITE_BLACKCAT_PUBLIC_KEY": "pk_98LtyQC254l3zTGscDDrKUdfEpnHCvMIygtXduJJzmdzHxIo",
+    "VITE_GA_TRACKING_ID": "G-1234567890",
+    "VITE_SITE_URL": "https://ferratech-tools.vercel.app"
+  },
+  "functions": {
+    "src/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+} 
