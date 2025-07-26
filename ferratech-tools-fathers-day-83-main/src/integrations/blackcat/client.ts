@@ -151,6 +151,15 @@ class BlackCatClient {
         enable3DS: paymentData.enable3DS || false
       };
 
+      // Para PIX, remover campos desnecessários
+      if (paymentData.payment_method === 'pix') {
+        delete payload.enable3DS;
+        // PIX não precisa de endereço de entrega
+        if (payload.shipping_address) {
+          delete payload.shipping_address;
+        }
+      }
+
       // Adicionar dados do cartão se for pagamento com cartão
       if (paymentData.payment_method === 'credit_card') {
         if (!paymentData.card_data) {
@@ -199,6 +208,37 @@ class BlackCatClient {
       }
 
       console.log('Enviando payload para BlackCat:', payload);
+
+      // Teste com payload mínimo para PIX
+      if (paymentData.payment_method === 'pix') {
+        const minimalPayload = {
+          amount: paymentData.amount,
+          currency: 'BRL',
+          description: paymentData.description,
+          customer: {
+            name: paymentData.customer.name,
+            email: paymentData.customer.email,
+            phone: paymentData.customer.phone,
+            cpf: paymentData.customer.cpf
+          },
+          payment_method: 'pix',
+          redirect_url: paymentData.redirect_url
+        };
+        
+        console.log('Payload mínimo para PIX:', minimalPayload);
+        
+        const response = await axios.post(
+          `${BLACKCAT_API_URL}/transactions`,
+          minimalPayload,
+          { 
+            headers: this.getHeaders(),
+            timeout: 30000
+          }
+        );
+        
+        console.log('Resposta do BlackCat:', response.data);
+        return response.data;
+      }
 
       const response = await axios.post(
         `${BLACKCAT_API_URL}/transactions`,

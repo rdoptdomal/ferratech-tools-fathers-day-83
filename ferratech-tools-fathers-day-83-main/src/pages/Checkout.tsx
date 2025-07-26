@@ -144,30 +144,70 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
+      // Validar dados antes de enviar
+      if (!form.customer.name.trim() || !form.customer.email.trim() || !form.customer.cpf.trim()) {
+        toast({
+          title: "Dados incompletos",
+          description: "Preencha nome, email e CPF",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      // Validar CPF
+      const cpf = form.customer.cpf.replace(/\D/g, "");
+      if (cpf.length !== 11) {
+        toast({
+          title: "CPF inválido",
+          description: "CPF deve ter 11 dígitos",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      // Validar endereço
+      if (!form.shipping.street.trim() || !form.shipping.city.trim() || !form.shipping.state.trim()) {
+        toast({
+          title: "Endereço incompleto",
+          description: "Preencha rua, cidade e estado",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Preparar dados base do pagamento
       const paymentData: BlackCatPaymentRequest = {
         amount: Math.round(total * 100), // BlackCat espera em centavos
         currency: "BRL",
         description: `Pedido Ferratech - ${cartItems.map(item => item.name).join(", ")}`,
         customer: {
-          name: form.customer.name,
-          email: form.customer.email,
-          phone: form.customer.phone,
-          cpf: form.customer.cpf.replace(/\D/g, "")
+          name: form.customer.name.trim(),
+          email: form.customer.email.trim(),
+          phone: form.customer.phone.replace(/\D/g, ""),
+          cpf: cpf
         },
         payment_method: paymentMethod as any,
-        shipping_address: {
-          street: form.shipping.street,
-          number: form.shipping.number,
-          complement: form.shipping.complement,
-          neighborhood: form.shipping.neighborhood,
-          city: form.shipping.city,
-          state: form.shipping.state,
-          zip_code: form.shipping.cep.replace(/\D/g, "")
-        },
         redirect_url: `${import.meta.env.VITE_SITE_URL}/checkout/callback`,
         enable3DS: paymentMethod === "credit-card" // 3DS apenas para cartão
       };
+
+      // Adicionar endereço apenas para métodos que precisam
+      if (paymentMethod !== "pix") {
+        paymentData.shipping_address = {
+          street: form.shipping.street.trim(),
+          number: form.shipping.number.trim(),
+          complement: form.shipping.complement?.trim() || "",
+          neighborhood: form.shipping.neighborhood.trim(),
+          city: form.shipping.city.trim(),
+          state: form.shipping.state.trim(),
+          zip_code: form.shipping.cep.replace(/\D/g, "")
+        };
+      }
+
+      console.log("Dados do pagamento:", paymentData);
 
       // Configurar dados específicos por método de pagamento
       if (paymentMethod === "credit-card") {
