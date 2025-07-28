@@ -9,6 +9,7 @@
   BLACKCAT_SECRET_KEY = "sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT"
   BLACKCAT_PUBLIC_KEY = "pk_98LtyQC254l3zTGscDDrKUdfEpHCVMIygtXduJJzmdzHxIo"
   NEXT_PUBLIC_API_URL = "https://ferratech-shop.netlify.app"
+  PRISMA_GENERATE_DATAPROXY = "true"
 
 [[redirects]]
   from = "/api/*"
