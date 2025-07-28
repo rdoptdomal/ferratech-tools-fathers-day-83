@@ -5,33 +5,40 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const categories = await prisma.category.findMany({
-      where: {
-        isActive: true
-      },
-      include: {
-        children: {
-          where: {
-            isActive: true
-          },
-          include: {
-            children: {
-              where: {
-                isActive: true
+    // Tentar buscar categorias do banco
+    let categories = [];
+    try {
+      categories = await prisma.category.findMany({
+        where: {
+          isActive: true
+        },
+        include: {
+          children: {
+            where: {
+              isActive: true
+            },
+            include: {
+              children: {
+                where: {
+                  isActive: true
+                }
               }
+            }
+          },
+          _count: {
+            select: {
+              products: true
             }
           }
         },
-        _count: {
-          select: {
-            products: true
-          }
+        orderBy: {
+          name: 'asc'
         }
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
+      });
+    } catch (dbError) {
+      console.error('Erro ao conectar com banco de dados:', dbError);
+      // Continuar com categorias mockadas
+    }
 
     // Se não há categorias no banco, retornar categorias mockadas
     if (!categories || categories.length === 0) {
