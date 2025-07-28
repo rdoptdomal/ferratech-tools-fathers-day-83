@@ -80,16 +80,27 @@ export default function HomePage({ featuredProducts = [], categories = [] }: Hom
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.slice(0, 6).map((category) => (
-              <CategoryBanner
-                key={category.id}
-                title={category.name}
-                subtitle={`${category.name} Profissionais`}
-                description={`Encontre as melhores ${category.name.toLowerCase()} para seu trabalho.`}
-                ctaText="Ver Produtos"
-                onCtaClick={() => window.location.href = `/categoria/${category.slug}`}
-              />
-            ))}
+            {categories.slice(0, 6).map((category) => {
+              // Garantir que category tem as propriedades necessárias
+              if (!category || !category.name) return null;
+              
+              return (
+                <CategoryBanner
+                  key={category.id || category.name}
+                  title={category.name}
+                  subtitle={`${category.name} Profissionais`}
+                  description={`Encontre as melhores ${category.name.toLowerCase()} para seu trabalho.`}
+                  ctaText="Ver Produtos"
+                  onCtaClick={() => {
+                    if (category.slug) {
+                      window.location.href = `/categoria/${category.slug}`;
+                    } else {
+                      window.location.href = '/produtos';
+                    }
+                  }}
+                />
+              );
+            })}
           </div>
         </section>
       )}
