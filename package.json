@@ -82,7 +82,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.1",
+    "node-fetch": "^3.3.2",
     "prisma": "^5.0.0",
+    "puppeteer": "^24.15.0",
     "tsx": "^3.12.0"
   }
 }

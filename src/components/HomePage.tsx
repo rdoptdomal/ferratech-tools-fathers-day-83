@@ -24,16 +24,16 @@ export default function HomePage({ featuredProducts = [], categories = [] }: Hom
           <PromoBanner
             title="Ferramentas Profissionais"
             subtitle="Até 50% de desconto"
-            imgSrc="/assets/hero-banner.jpg"
-            link="/categoria/ferramentas-eletricas"
-            buttonText="Ver Ofertas"
+            ctaText="Ver Ofertas"
+            ctaLink="/categoria/ferramentas-eletricas"
+            discount="50% OFF"
           />
           <PromoBanner
             title="Equipamentos de Segurança"
             subtitle="Proteção garantida"
-            imgSrc="/assets/hero-banner.jpg"
-            link="/categoria/equipamentos-seguranca"
-            buttonText="Ver Produtos"
+            ctaText="Ver Produtos"
+            ctaLink="/categoria/equipamentos-seguranca"
+            discount="30% OFF"
           />
         </div>
       </div>
@@ -81,7 +81,14 @@ export default function HomePage({ featuredProducts = [], categories = [] }: Hom
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.slice(0, 6).map((category) => (
-              <CategoryBanner key={category.id} data={category} />
+              <CategoryBanner
+                key={category.id}
+                title={category.name}
+                subtitle={`${category.name} Profissionais`}
+                description={`Encontre as melhores ${category.name.toLowerCase()} para seu trabalho.`}
+                ctaText="Ver Produtos"
+                onCtaClick={() => window.location.href = `/categoria/${category.slug}`}
+              />
             ))}
           </div>
         </section>
