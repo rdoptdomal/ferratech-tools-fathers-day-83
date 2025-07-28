@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '12');
     const search = searchParams.get('search');
+    const featured = searchParams.get('featured') === 'true';
 
     const skip = (page - 1) * limit;
 
@@ -33,6 +34,10 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    if (featured) {
+      where.isFeatured = true;
+    }
+
     // Buscar produtos com paginação
     const [products, totalProducts] = await Promise.all([
       prisma.product.findMany({
@@ -42,7 +47,10 @@ export async function GET(request: NextRequest) {
         },
         skip,
         take: limit,
-        orderBy: {
+        orderBy: featured ? [
+          { isFeatured: 'desc' },
+          { rating: 'desc' }
+        ] : {
           createdAt: 'desc'
         }
       }),

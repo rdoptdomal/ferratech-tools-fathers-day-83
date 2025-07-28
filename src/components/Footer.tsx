@@ -125,18 +125,23 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contato" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="/trocas-devolucoes" className="text-gray-300 hover:text-primary transition-colors">
                   Trocas e Devoluções
                 </Link>
               </li>
               <li>
-                <Link href="/contato" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="/faq" className="text-gray-300 hover:text-primary transition-colors">
                   Perguntas Frequentes
                 </Link>
               </li>
               <li>
-                <Link href="/contato" className="text-gray-300 hover:text-primary transition-colors">
-                  Fale Conosco
+                <Link href="/sobre" className="text-gray-300 hover:text-primary transition-colors">
+                  Sobre Nós
+                </Link>
+              </li>
+              <li>
+                <Link href="/politica-privacidade" className="text-gray-300 hover:text-primary transition-colors">
+                  Política de Privacidade
                 </Link>
               </li>
             </ul>

@@ -1,60 +1,59 @@
-import { Button } from "@/components/ui/button";
+'use client';
+
+import Link from 'next/link';
+import { ArrowRight, Tag, Zap } from 'lucide-react';
 
 interface PromoBannerProps {
   title: string;
-  subtitle?: string;
+  subtitle: string;
   ctaText: string;
-  ctaAction?: () => void;
-  backgroundColor?: string;
+  ctaLink: string;
+  discount?: string;
+  bgColor?: string;
   textColor?: string;
-  icon?: string;
+  icon?: 'tag' | 'zap';
 }
 
-const PromoBanner = ({
+export default function PromoBanner({
   title,
   subtitle,
   ctaText,
-  ctaAction,
-  backgroundColor = "bg-secondary",
-  textColor = "text-secondary-foreground",
-  icon = "🔥",
-}: PromoBannerProps) => {
-  return (
-    <div className={`${backgroundColor} ${textColor} py-4 text-center relative overflow-hidden`}>
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 transform rotate-45 translate-x-[-50%] translate-y-[-50%]">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="w-16 h-16 border border-current m-8 animate-float"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            />
-          ))}
-        </div>
-      </div>
+  ctaLink,
+  discount,
+  bgColor = 'bg-gradient-to-r from-orange-500 to-red-500',
+  textColor = 'text-white',
+  icon = 'tag'
+}: PromoBannerProps) {
+  const IconComponent = icon === 'tag' ? Tag : Zap;
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <span className="text-2xl animate-bounce">{icon}</span>
-          <span className="font-bold text-lg md:text-xl">{title}</span>
-          {subtitle && (
-            <span className="hidden md:inline text-sm opacity-90">{subtitle}</span>
-          )}
-          {ctaAction && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={ctaAction}
-              className="ml-4 border-current text-current hover:bg-current hover:text-secondary"
-            >
-              {ctaText}
-            </Button>
-          )}
+  return (
+    <div className={`${bgColor} ${textColor} rounded-lg p-6 shadow-lg`}>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="flex items-center space-x-2 mb-2">
+            <IconComponent className="h-5 w-5" />
+            {discount && (
+              <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-semibold">
+                {discount}
+              </span>
+            )}
+          </div>
+          <h3 className="text-xl font-bold mb-1">{title}</h3>
+          <p className="text-sm opacity-90 mb-4">{subtitle}</p>
+          <Link
+            href={ctaLink}
+            className="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 transition-colors px-4 py-2 rounded-lg text-sm font-semibold"
+          >
+            <span>{ctaText}</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="hidden md:block">
+          <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
+            <IconComponent className="h-12 w-12" />
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default PromoBanner;
+}

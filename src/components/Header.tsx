@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Search, 
   ShoppingCart, 
   User, 
   Menu, 
@@ -15,6 +14,7 @@ import {
   Mail,
   ChevronDown
 } from 'lucide-react';
+import { SearchBar } from './SearchBar';
 
 interface Category {
   id: string;
@@ -37,7 +37,6 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     // Buscar categorias da API
@@ -46,13 +45,6 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
       .then(data => setCategories(data))
       .catch(error => console.error('Erro ao carregar categorias:', error));
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/produtos?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -99,23 +91,7 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pr-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1"
-                >
-                  <Search className="h-4 w-4 text-gray-400" />
-                </button>
-              </div>
-            </form>
+            <SearchBar />
           </div>
 
           {/* Navigation - Desktop */}
@@ -183,57 +159,42 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 text-gray-600 hover:text-primary transition-colors"
               onClick={toggleMenu}
+              className="lg:hidden p-2 text-gray-600 hover:text-primary transition-colors"
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Search Bar */}
-        <div className="md:hidden mt-4">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar produtos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1"
-              >
-                <Search className="h-4 w-4 text-gray-400" />
-              </button>
-            </div>
-          </form>
-        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden border-t bg-white">
+        <div className="lg:hidden bg-white border-t">
           <div className="container mx-auto px-4 py-4">
-            <nav className="space-y-4">
+            {/* Mobile Search */}
+            <div className="mb-4">
+              <SearchBar />
+            </div>
+
+            {/* Mobile Navigation */}
+            <nav className="space-y-2">
               {categories.map((category) => (
                 <div key={category.id}>
                   <Link
                     href={`/categoria/${category.slug}`}
-                    className="block text-text-primary hover:text-primary transition-colors font-medium"
+                    className="block py-2 text-text-primary hover:text-primary transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {category.name}
                   </Link>
                   {category.children && (
-                    <div className="ml-4 mt-2 space-y-2">
+                    <div className="ml-4 space-y-1">
                       {category.children.map((subCategory) => (
                         <Link
                           key={subCategory.id}
                           href={`/categoria/${subCategory.slug}`}
-                          className="block text-sm text-gray-600 hover:text-primary transition-colors"
+                          className="block py-1 text-sm text-gray-600 hover:text-primary transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           {subCategory.name}
@@ -243,23 +204,34 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
                   )}
                 </div>
               ))}
-              <div className="border-t pt-4">
+            </nav>
+
+            {/* Mobile Actions */}
+            <div className="mt-6 pt-4 border-t">
+              <div className="flex items-center justify-between">
                 <Link
-                  href="/sobre"
-                  className="block text-text-primary hover:text-primary transition-colors"
+                  href="/minha-conta"
+                  className="flex items-center space-x-2 text-text-primary hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Sobre Nós
+                  <User className="h-5 w-5" />
+                  <span>Minha Conta</span>
                 </Link>
                 <Link
-                  href="/contato"
-                  className="block text-text-primary hover:text-primary transition-colors"
+                  href="/carrinho"
+                  className="flex items-center space-x-2 text-text-primary hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Contato
+                  <ShoppingCart className="h-5 w-5" />
+                  <span>Carrinho</span>
+                  {cartItemsCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItemsCount}
+                    </span>
+                  )}
                 </Link>
               </div>
-            </nav>
+            </div>
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import ProductCard from './ProductCard';
 import Header from './Header';
 import Footer from './Footer';
 import HeroBanner from './HeroBanner';
+import PromoBanner from './PromoBanner';
 import { Product } from '@/types';
 
 export default function HomePage() {
@@ -20,7 +21,7 @@ export default function HomePage() {
 
   const loadFeaturedProducts = async () => {
     try {
-      const response = await fetch('/api/products?limit=8');
+      const response = await fetch('/api/products?featured=true&limit=8');
       const data = await response.json();
       setFeaturedProducts(data.products);
     } catch (error) {
@@ -69,6 +70,32 @@ export default function HomePage() {
               <h3 className="font-bold text-lg mb-2">Atendimento</h3>
               <p className="text-gray-600">Suporte especializado</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Promotional Banners */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PromoBanner
+              title="ESPECIAL DIA DOS PAIS"
+              subtitle="Até 50% OFF + Frete Grátis em ferramentas selecionadas"
+              ctaText="Ver Ofertas"
+              ctaLink="/categoria/ferramentas-eletricas"
+              discount="50% OFF"
+              bgColor="bg-gradient-to-r from-blue-600 to-purple-600"
+              icon="tag"
+            />
+            <PromoBanner
+              title="FEIRÃO DA ELÉTRICA"
+              subtitle="Tudo para sua instalação com 30% OFF"
+              ctaText="Comprar Agora"
+              ctaLink="/categoria/ferramentas-eletricas"
+              discount="30% OFF"
+              bgColor="bg-gradient-to-r from-orange-500 to-red-500"
+              icon="zap"
+            />
           </div>
         </div>
       </section>
