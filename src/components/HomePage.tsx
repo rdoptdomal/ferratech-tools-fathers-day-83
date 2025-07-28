@@ -23,9 +23,10 @@ export default function HomePage() {
     try {
       const response = await fetch('/api/products?featured=true&limit=8');
       const data = await response.json();
-      setFeaturedProducts(data.products);
+      setFeaturedProducts(data.products || []);
     } catch (error) {
       console.error('Erro ao carregar produtos:', error);
+      setFeaturedProducts([]);
     } finally {
       setLoading(false);
     }
@@ -136,12 +137,18 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product}
-                />
-              ))}
+              {featuredProducts && featuredProducts.length > 0 ? (
+                featuredProducts.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">Nenhum produto em destaque encontrado.</p>
+                </div>
+              )}
             </div>
           )}
         </div>

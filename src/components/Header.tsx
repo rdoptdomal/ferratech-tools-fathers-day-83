@@ -42,8 +42,11 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
     // Buscar categorias da API
     fetch('/api/categories')
       .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(error => console.error('Erro ao carregar categorias:', error));
+      .then(data => setCategories(data || []))
+      .catch(error => {
+        console.error('Erro ao carregar categorias:', error);
+        setCategories([]);
+      });
   }, []);
 
   const toggleMenu = () => {
@@ -96,43 +99,58 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
 
           {/* Navigation - Desktop */}
           <nav className="hidden lg:flex items-center space-x-6">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="relative"
-                onMouseEnter={() => setHoveredCategory(category.id)}
-                onMouseLeave={() => setHoveredCategory(null)}
-              >
-                <button className="flex items-center space-x-1 text-text-primary hover:text-primary transition-colors">
-                  <span>{category.name}</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
+            {categories && categories.length > 0 ? (
+              categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="relative"
+                  onMouseEnter={() => setHoveredCategory(category.id)}
+                  onMouseLeave={() => setHoveredCategory(null)}
+                >
+                  <button className="flex items-center space-x-1 text-text-primary hover:text-primary transition-colors">
+                    <span>{category.name}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
 
-                {/* Mega Menu */}
-                {hoveredCategory === category.id && category.children && (
-                  <div className="absolute top-full left-0 w-96 bg-white border border-gray-200 rounded-lg shadow-lg p-6 z-50">
-                    <div className="grid grid-cols-2 gap-4">
-                      {category.children.map((subCategory) => (
-                        <Link
-                          key={subCategory.id}
-                          href={`/categoria/${subCategory.slug}`}
-                          className="block p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <h4 className="font-semibold text-text-primary mb-1">
-                            {subCategory.name}
-                          </h4>
-                          {subCategory._count && (
-                            <p className="text-sm text-gray-500">
-                              {subCategory._count.products} produtos
-                            </p>
-                          )}
-                        </Link>
-                      ))}
+                  {/* Mega Menu */}
+                  {hoveredCategory === category.id && category.children && category.children.length > 0 && (
+                    <div className="absolute top-full left-0 w-96 bg-white border border-gray-200 rounded-lg shadow-lg p-6 z-50">
+                      <div className="grid grid-cols-2 gap-4">
+                        {category.children.map((subCategory) => (
+                          <Link
+                            key={subCategory.id}
+                            href={`/categoria/${subCategory.slug}`}
+                            className="block p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <h4 className="font-semibold text-text-primary mb-1">
+                              {subCategory.name}
+                            </h4>
+                            {subCategory._count && (
+                              <p className="text-sm text-gray-500">
+                                {subCategory._count.products} produtos
+                              </p>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))
+            ) : (
+              // Fallback navigation when categories are not loaded
+              <>
+                <Link href="/produtos" className="text-text-primary hover:text-primary transition-colors">
+                  Produtos
+                </Link>
+                <Link href="/categoria/ferramentas-eletricas" className="text-text-primary hover:text-primary transition-colors">
+                  Ferramentas Elétricas
+                </Link>
+                <Link href="/categoria/ferramentas-manuais" className="text-text-primary hover:text-primary transition-colors">
+                  Ferramentas Manuais
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Actions */}
@@ -179,31 +197,58 @@ export default function Header({ cartItemsCount = 0 }: HeaderProps) {
 
             {/* Mobile Navigation */}
             <nav className="space-y-2">
-              {categories.map((category) => (
-                <div key={category.id}>
+              {categories && categories.length > 0 ? (
+                categories.map((category) => (
+                  <div key={category.id}>
+                    <Link
+                      href={`/categoria/${category.slug}`}
+                      className="block py-2 text-text-primary hover:text-primary transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {category.name}
+                    </Link>
+                    {category.children && category.children.length > 0 && (
+                      <div className="ml-4 space-y-1">
+                        {category.children.map((subCategory) => (
+                          <Link
+                            key={subCategory.id}
+                            href={`/categoria/${subCategory.slug}`}
+                            className="block py-1 text-sm text-gray-600 hover:text-primary transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {subCategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                // Fallback mobile navigation
+                <>
                   <Link
-                    href={`/categoria/${category.slug}`}
+                    href="/produtos"
                     className="block py-2 text-text-primary hover:text-primary transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {category.name}
+                    Produtos
                   </Link>
-                  {category.children && (
-                    <div className="ml-4 space-y-1">
-                      {category.children.map((subCategory) => (
-                        <Link
-                          key={subCategory.id}
-                          href={`/categoria/${subCategory.slug}`}
-                          className="block py-1 text-sm text-gray-600 hover:text-primary transition-colors"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {subCategory.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                  <Link
+                    href="/categoria/ferramentas-eletricas"
+                    className="block py-2 text-text-primary hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Ferramentas Elétricas
+                  </Link>
+                  <Link
+                    href="/categoria/ferramentas-manuais"
+                    className="block py-2 text-text-primary hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Ferramentas Manuais
+                  </Link>
+                </>
+              )}
             </nav>
 
             {/* Mobile Actions */}
