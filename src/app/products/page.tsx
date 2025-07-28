@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Search, Filter, Grid, List, ChevronDown, Star } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import { Filter, Grid, List, Search, X } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -28,44 +29,41 @@ interface Category {
 }
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
-    category: '',
-    search: '',
-    minPrice: '',
-    maxPrice: '',
-    brand: '',
-    sortBy: 'relevance'
-  });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [filters]);
+  const [filters, setFilters] = useState({
+    search: searchParams?.get('search') || '',
+    category: searchParams?.get('category') || '',
+    brand: searchParams?.get('brand') || '',
+    minPrice: searchParams?.get('minPrice') || '',
+    maxPrice: searchParams?.get('maxPrice') || '',
+    sortBy: 'relevance'
+  });
 
   const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       const params = new URLSearchParams();
-      
-      if (filters.category) params.append('category', filters.category);
       if (filters.search) params.append('search', filters.search);
+      if (filters.category) params.append('category', filters.category);
+      if (filters.brand) params.append('brand', filters.brand);
       if (filters.minPrice) params.append('minPrice', filters.minPrice);
       if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
-      if (filters.brand) params.append('brand', filters.brand);
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
 
       const response = await fetch(`/api/products?${params.toString()}`);
+      if (!response.ok) throw new Error('Erro ao carregar produtos');
+      
       const data = await response.json();
       setProducts(data.products || []);
     } catch (err) {
-      setError('Erro ao carregar produtos');
-      console.error('Erro ao buscar produtos:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
@@ -74,10 +72,12 @@ export default function ProductsPage() {
   const fetchCategories = async () => {
     try {
       const response = await fetch('/api/categories');
-      const data = await response.json();
-      setCategories(data);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data || []);
+      }
     } catch (err) {
-      console.error('Erro ao buscar categorias:', err);
+      console.error('Erro ao carregar categorias:', err);
     }
   };
 
@@ -87,18 +87,18 @@ export default function ProductsPage() {
 
   const clearFilters = () => {
     setFilters({
-      category: '',
       search: '',
+      category: '',
+      brand: '',
       minPrice: '',
       maxPrice: '',
-      brand: '',
       sortBy: 'relevance'
     });
   };
 
   const getUniqueBrands = () => {
-    const brands = products.map(p => p.brand);
-    return [...new Set(brands)];
+    const brands = products.map(p => p.brand).filter(Boolean);
+    return brands.filter((brand, index) => brands.indexOf(brand) === index);
   };
 
   if (loading) {
@@ -206,12 +206,13 @@ export default function ProductsPage() {
                 <option value="price_desc">Maior Preço</option>
                 <option value="name_asc">Nome A-Z</option>
                 <option value="name_desc">Nome Z-A</option>
+                <option value="rating">Melhor Avaliados</option>
               </select>
             </div>
           </div>
 
           {/* Filtros Expandidos */}
-          {(showFilters || window.innerWidth >= 1024) && (
+          {showFilters && (
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Categoria */}
@@ -224,7 +225,7 @@ export default function ProductsPage() {
                     onChange={(e) => handleFilterChange('category', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Todas as categorias</option>
+                    <option value="">Todas as Categorias</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.slug}>
                         {category.name}
@@ -243,7 +244,7 @@ export default function ProductsPage() {
                     onChange={(e) => handleFilterChange('brand', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Todas as marcas</option>
+                    <option value="">Todas as Marcas</option>
                     {getUniqueBrands().map((brand) => (
                       <option key={brand} value={brand}>
                         {brand}
@@ -281,14 +282,19 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              {/* Botão Limpar Filtros */}
-              <div className="mt-4 flex justify-end">
+              {/* Botões de Ação */}
+              <div className="mt-4 flex items-center space-x-4">
+                <button
+                  onClick={fetchProducts}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Aplicar Filtros
+                </button>
                 <button
                   onClick={clearFilters}
-                  className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  <X className="h-4 w-4" />
-                  <span>Limpar Filtros</span>
+                  Limpar Filtros
                 </button>
               </div>
             </div>
@@ -296,44 +302,47 @@ export default function ProductsPage() {
         </div>
 
         {/* Resultados */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            {products.length} produto{products.length !== 1 ? 's' : ''} encontrado{products.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-
-        {/* Grid de Produtos */}
-        {products.length > 0 ? (
-          <div className={
-            viewMode === 'grid' 
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-              : 'space-y-4'
-          }>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">
+              {products.length} produto{products.length !== 1 ? 's' : ''} encontrado{products.length !== 1 ? 's' : ''}
+            </p>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <svg className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+
+          {/* Grid de Produtos */}
+          {products.length > 0 ? (
+            <div className={
+              viewMode === 'grid' 
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'space-y-4'
+            }>
+              {products.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-gray-400" />
+              </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Nenhum produto encontrado
               </h3>
-              <p className="text-gray-600 mb-6">
-                Tente ajustar os filtros ou buscar por outro termo
+              <p className="text-gray-600 mb-4">
+                Tente ajustar os filtros ou buscar por outros termos
               </p>
               <button
                 onClick={clearFilters}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Limpar Filtros
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

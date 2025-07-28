@@ -31,7 +31,13 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map((product: Product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard 
+                key={product.id} 
+                product={{
+                  ...product,
+                  brand: product.brand || 'Sem marca'
+                }}
+              />
             ))}
           </div>
         </div>

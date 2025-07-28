@@ -141,7 +141,10 @@ export default function HomePage() {
                 featuredProducts.map((product) => (
                   <ProductCard 
                     key={product.id} 
-                    product={product}
+                    product={{
+                      ...product,
+                      brand: product.brand || 'Sem marca'
+                    }}
                   />
                 ))
               ) : (

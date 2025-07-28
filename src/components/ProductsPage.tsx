@@ -156,7 +156,13 @@ export default function ProductsPage() {
               : 'grid-cols-1'
           }`}>
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard 
+                key={product.id} 
+                product={{
+                  ...product,
+                  brand: product.brand || 'Sem marca'
+                }}
+              />
             ))}
           </div>
         ) : (
