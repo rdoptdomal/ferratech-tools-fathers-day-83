@@ -21,6 +21,10 @@ const nextConfig = {
     }
     return config;
   },
+  // Add trailing slash for better compatibility
+  trailingSlash: true,
+  // Ensure proper base path
+  basePath: '',
 }
 
 module.exports = nextConfig 
