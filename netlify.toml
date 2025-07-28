@@ -8,6 +8,9 @@
   PRISMA_GENERATE_DATAPROXY = "true"
   SECRETS_SCAN_ENABLED = "false"
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api"
