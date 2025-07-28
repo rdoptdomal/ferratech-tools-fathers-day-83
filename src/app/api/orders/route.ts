@@ -34,7 +34,13 @@ export async function GET(request: NextRequest) {
           }
         },
         shippingAddress: true,
-        payment: true
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -68,29 +74,26 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, items, shippingAddress, paymentMethod, total } = body;
+    const { userId, addressId, items, paymentMethod, subtotal, shipping, discount, total } = body;
 
     // Criar pedido
     const order = await prisma.order.create({
       data: {
         userId,
-        status: 'pending',
+        addressId,
+        subtotal,
+        shipping,
+        discount,
         total,
-        shippingAddress: {
-          create: shippingAddress
-        },
-        payment: {
-          create: {
-            method: paymentMethod,
-            status: 'pending',
-            amount: total
-          }
-        },
+        paymentMethod,
+        status: 'PENDING',
+        paymentStatus: 'PENDING',
         items: {
           create: items.map((item: any) => ({
             productId: item.productId,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            variation: item.variation || null
           }))
         }
       },
@@ -101,7 +104,13 @@ export async function POST(request: NextRequest) {
           }
         },
         shippingAddress: true,
-        payment: true
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
       }
     });
 
