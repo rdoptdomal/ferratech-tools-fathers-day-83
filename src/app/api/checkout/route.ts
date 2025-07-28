@@ -35,8 +35,8 @@ interface CheckoutData {
   };
 }
 
-const BLACKCAT_SECRET_KEY = 'sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT';
-const BLACKCAT_PUBLIC_KEY = 'pk_98LtyQC254l3zTGscDDrKUdfEpnHCvMIygtXduJJzmdzHxIo';
+const BLACKCAT_SECRET_KEY = process.env.BLACKCAT_SECRET_KEY!;
+const BLACKCAT_PUBLIC_KEY = process.env.BLACKCAT_PUBLIC_KEY!;
 
 export async function POST(request: NextRequest) {
   try {

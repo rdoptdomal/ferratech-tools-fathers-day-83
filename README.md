@@ -40,11 +40,11 @@ cp env.example .env.local
 
 Edite o arquivo `.env.local` com suas configurações:
 ```env
-DATABASE_URL="mongodb+srv://rdoptdomal:Helena2270184!@ferratech.wbmjhml.mongodb.net/ferratech?retryWrites=true&w=majority&appName=ferratech"
+DATABASE_URL="your_mongodb_atlas_url_here"
 NEXT_PUBLIC_API_URL="http://localhost:3000"
 NEXT_PUBLIC_SITE_URL="https://ferratech.shop"
-BLACKCAT_SECRET_KEY="sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT"
-BLACKCAT_PUBLIC_KEY="pk_98LtyQC254l3zTGscDDrKUdfEpnHCvMIygtXduJJzmdzHxIo"
+BLACKCAT_SECRET_KEY="your_blackcat_secret_key_here"
+BLACKCAT_PUBLIC_KEY="your_blackcat_public_key_here"
 ```
 
 4. **Configure o banco de dados MongoDB**
@@ -141,93 +141,4 @@ npm run db:reset     # Reseta e popula o banco
 1. Configure as chaves do BlackCat no `.env.local`
 2. Configure o webhook no painel do BlackCat:
    - URL: `https://ferratech.shop/api/webhooks/blackcat`
-   - Eventos: `payment.created`, `payment.approved`, `payment.failed`
-
-### Métodos de Pagamento
-- **PIX** - Pagamento instantâneo
-- **Cartão de Crédito** - Parcelamento em até 12x
-- **Boleto** - Pagamento em até 3 dias úteis
-- **Transferência Bancária** - PIX direto
-
-## 🚀 Deploy no Netlify
-
-### 1. Preparação
-```bash
-# Build local para testar
-npm run build
-
-# Commit das mudanças
-git add .
-git commit -m "Preparando para deploy"
-git push origin main
-```
-
-### 2. Configuração no Netlify
-1. Conecte seu repositório ao Netlify
-2. Configure as variáveis de ambiente:
-   ```
-   DATABASE_URL=mongodb+srv://rdoptdomal:Helena2270184!@ferratech.wbmjhml.mongodb.net/ferratech?retryWrites=true&w=majority&appName=ferratech
-   BLACKCAT_SECRET_KEY=sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT
-   BLACKCAT_PUBLIC_KEY=pk_98LtyQC254l3zTGscDDrKUdfEpnHCvMIygtXduJJzmdzHxIo
-   NEXT_PUBLIC_SITE_URL=https://seu-dominio.netlify.app
-   ```
-
-### 3. Configuração do Banco
-- MongoDB Atlas já configurado
-- URL: `mongodb+srv://rdoptdomal:Helena2270184!@ferratech.wbmjhml.mongodb.net/ferratech?retryWrites=true&w=majority&appName=ferratech`
-
-### 4. Configuração do Webhook
-- No painel do BlackCat, configure o webhook:
-  - URL: `https://seu-dominio.netlify.app/api/webhooks/blackcat`
-  - Método: POST
-  - Eventos: Todos os eventos de pagamento
-
-## 🎯 Características Técnicas
-
-### Mobile-First
-- Design responsivo otimizado para dispositivos móveis
-- Componentes adaptáveis para diferentes tamanhos de tela
-- Performance otimizada para conexões lentas
-
-### SEO Otimizado
-- Meta tags dinâmicas para cada página
-- Estrutura de dados semântica
-- URLs amigáveis e breadcrumbs
-- Sitemap automático
-
-### Performance
-- Lazy loading de imagens
-- Code splitting automático
-- Cache inteligente com SWR
-- Otimizações de bundle
-
-### Segurança
-- Validação de dados no backend
-- Recalculo de preços no servidor
-- Proteção contra CSRF
-- Sanitização de inputs
-- Verificação de assinatura de webhooks
-
-## 📝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 🤝 Suporte
-
-- 📧 Email: contato@ferratech.com.br
-- 📱 WhatsApp: (51) 98145-6622
-- 🌐 Website: https://ferratech.shop
-
-## 🙏 Agradecimentos
-
-- BlackCat Pagamentos pela integração
-- Comunidade Next.js e React
-- Contribuidores do projeto 
+   - Eventos: `payment.created`, `

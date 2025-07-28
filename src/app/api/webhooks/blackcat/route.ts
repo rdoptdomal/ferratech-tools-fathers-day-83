@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
-const BLACKCAT_SECRET_KEY = 'sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT';
+const BLACKCAT_SECRET_KEY = process.env.BLACKCAT_SECRET_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
