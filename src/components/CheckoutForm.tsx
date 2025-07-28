@@ -437,17 +437,6 @@ export default function CheckoutForm({ cartItems, onCheckoutComplete }: Checkout
                       />
                       <span className="text-gray-900">Cartão de Crédito</span>
                     </label>
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="boleto"
-                        checked={formData.paymentMethod === 'boleto'}
-                        onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-900">Boleto Bancário</span>
-                    </label>
                   </div>
 
                   {/* Dados do Cartão */}

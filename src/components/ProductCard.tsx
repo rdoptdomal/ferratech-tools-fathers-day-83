@@ -1,170 +1,138 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Heart, Star, ShoppingCart } from 'lucide-react';
-import { Product } from '@/types';
+import { ShoppingCart, Heart, Eye } from 'lucide-react';
 
 interface ProductCardProps {
-  product: Product;
-  onAddToCart?: (product: Product, variation?: any) => void;
-  onAddToWishlist?: (product: Product) => void;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    originalPrice?: number;
+    images: string[];
+    brand: string;
+    rating?: number;
+    reviews?: number;
+    isFeatured?: boolean;
+  };
 }
 
-export default function ProductCard({ product, onAddToCart, onAddToWishlist }: ProductCardProps) {
-  const [selectedVariation, setSelectedVariation] = useState<any>(null);
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
-  const formatPrice = (price: number) => {
+export default function ProductCard({ product }: ProductCardProps) {
+  const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(price);
+    }).format(value);
   };
 
-  const handleAddToCart = () => {
-    if (onAddToCart) {
-      onAddToCart(product, selectedVariation);
-    }
-  };
-
-  const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    if (onAddToWishlist) {
-      onAddToWishlist(product);
-    }
-  };
-
-  const handleVariationChange = (key: string, value: string) => {
-    setSelectedVariation((prev: any) => ({
-      ...prev,
-      [key]: value
-    }));
-  };
+  const discountPercentage = product.originalPrice 
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
 
   return (
-    <div className="group border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-      {/* Product Image */}
-      <Link href={`/produto/${product.slug}`}>
-        <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
-          <Image
-            src={product.images[0] || '/placeholder.jpg'}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          
-          {/* Discount Badge */}
-          {product.originalPrice && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-            </div>
-          )}
-
-          {/* Wishlist Button */}
-          <button
-            onClick={handleWishlist}
-            className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-          >
-            <Heart 
-              className={`h-4 w-4 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} 
-            />
-          </button>
+    <div className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+      {/* Badge de Destaque */}
+      {product.isFeatured && (
+        <div className="absolute top-3 left-3 z-10">
+          <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            DESTAQUE
+          </span>
         </div>
-      </Link>
+      )}
 
-      {/* Product Info */}
-      <div className="space-y-3">
-        {/* Brand */}
-        {product.brand && (
-          <p className="text-sm text-gray-500">{product.brand}</p>
-        )}
+      {/* Badge de Desconto */}
+      {discountPercentage > 0 && (
+        <div className="absolute top-3 right-3 z-10">
+          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+            -{discountPercentage}%
+          </span>
+        </div>
+      )}
 
-        {/* Product Name */}
-        <Link href={`/produto/${product.slug}`}>
-          <h3 className="font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+      {/* Imagem do Produto */}
+      <div className="relative aspect-square overflow-hidden bg-gray-100">
+        <img
+          src={product.images[0] || '/placeholder.svg'}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        
+        {/* Overlay com ações */}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">
+            <button className="bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors">
+              <Heart className="h-5 w-5 text-gray-600" />
+            </button>
+            <Link href={`/product/${product.slug}`}>
+              <button className="bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors">
+                <Eye className="h-5 w-5 text-gray-600" />
+              </button>
+            </Link>
+            <button className="bg-blue-600 p-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+              <ShoppingCart className="h-5 w-5 text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Informações do Produto */}
+      <div className="p-4">
+        {/* Marca */}
+        <div className="text-xs text-blue-600 font-medium mb-1">
+          {product.brand}
+        </div>
+
+        {/* Nome do Produto */}
+        <Link href={`/product/${product.slug}`}>
+          <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3 w-3 ${
-                  i < Math.floor(product.rating)
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-xs text-gray-500">
-            ({product.reviews})
-          </span>
-        </div>
-
-        {/* Variations */}
-        {product.variations && Object.keys(product.variations).length > 0 && (
-          <div className="space-y-2">
-            {Object.entries(product.variations).map(([key, values]) => (
-              <div key={key}>
-                <label className="text-xs text-gray-600 block mb-1">
-                  {key}:
-                </label>
-                <select
-                  onChange={(e) => handleVariationChange(key, e.target.value)}
-                  className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+        {/* Avaliações */}
+        {product.rating && (
+          <div className="flex items-center mb-3">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <svg
+                  key={i}
+                  className={`h-4 w-4 ${
+                    i < Math.floor(product.rating!) ? 'text-yellow-400' : 'text-gray-300'
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
-                  <option value="">Selecione {key}</option>
-                  {Array.isArray(values) && values.map((value: string) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 ml-1">
+              ({product.reviews || 0})
+            </span>
           </div>
         )}
 
-        {/* Price */}
-        <div className="flex items-center gap-2">
-          {product.originalPrice ? (
-            <>
-              <span className="text-lg font-bold text-primary">
-                {formatPrice(product.price)}
-              </span>
-              <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            </>
-          ) : (
-            <span className="text-lg font-bold text-primary">
-              {formatPrice(product.price)}
+        {/* Preços */}
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(product.price)}
             </span>
-          )}
+            {product.originalPrice && (
+              <span className="text-sm text-gray-500 line-through ml-2">
+                {formatCurrency(product.originalPrice)}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Add to Cart Button */}
-        <button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-        >
+        {/* Botão Adicionar ao Carrinho */}
+        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2">
           <ShoppingCart className="h-4 w-4" />
-          {product.stock === 0 ? 'Esgotado' : 'Adicionar ao Carrinho'}
+          <span>Adicionar</span>
         </button>
-
-        {/* Stock Status */}
-        {product.stock > 0 && product.stock <= 5 && (
-          <p className="text-xs text-orange-600">
-            Apenas {product.stock} em estoque!
-          </p>
-        )}
       </div>
     </div>
   );
