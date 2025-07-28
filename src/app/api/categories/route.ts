@@ -3,10 +3,24 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  image?: string | null;
+  isActive: boolean;
+  parentId?: string | null;
+  children: Category[];
+  _count: { products: number };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Tentar buscar categorias do banco
-    let categories = [];
+    let categories: any[] = [];
     try {
       categories = await prisma.category.findMany({
         where: {
@@ -42,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     // Se não há categorias no banco, retornar categorias mockadas
     if (!categories || categories.length === 0) {
-      const mockCategories = [
+      const mockCategories: Category[] = [
         {
           id: '1',
           name: 'Ferramentas Elétricas',
@@ -106,7 +120,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro ao buscar categorias:', error);
     
     // Em caso de erro, retornar categorias mockadas
-    const mockCategories = [
+    const mockCategories: Category[] = [
       {
         id: '1',
         name: 'Ferramentas Elétricas',
