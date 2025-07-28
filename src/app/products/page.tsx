@@ -47,7 +47,6 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     setLoading(true);
-    setError(null);
     try {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
@@ -55,15 +54,25 @@ export default function ProductsPage() {
       if (filters.brand) params.append('brand', filters.brand);
       if (filters.minPrice) params.append('minPrice', filters.minPrice);
       if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
-      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+      params.append('limit', '24');
 
-      const response = await fetch(`/api/products?${params.toString()}`);
-      if (!response.ok) throw new Error('Erro ao carregar produtos');
-      
+      const response = await fetch(`/api/products?${params}`);
       const data = await response.json();
-      setProducts(data.products || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      
+      // Mapear produtos para garantir compatibilidade com o tipo Product
+      const mappedProducts = (data.products || []).map((product: any) => ({
+        ...product,
+        description: product.description || '',
+        stock: product.stock || 0,
+        brand: product.brand || 'Sem marca',
+        category: product.category?.name || product.category || undefined,
+        specifications: Array.isArray(product.specifications) ? product.specifications : undefined
+      }));
+      
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
