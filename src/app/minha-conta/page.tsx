@@ -162,112 +162,23 @@ export default function MyAccountPage() {
                 Pedidos Recentes
               </h2>
               
-              <div className="space-y-4">
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Pedido #12345
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Realizado em 15/12/2024
-                      </p>
-                    </div>
-                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Entregue
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 mb-4">
-                    <img
-                      src="https://images.unsplash.com/photo-1581147036324-c1c89c2c8b5c?w=100&h=100&fit=crop"
-                      alt="Furadeira"
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
-                        Furadeira de Impacto 650W Profissional
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        Quantidade: 1
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">
-                        R$ 189,90
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Total: R$ 189,90
-                    </p>
-                    <a
-                      href="/meus-pedidos/12345"
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      Ver Detalhes
-                    </a>
-                  </div>
+              <div className="text-center py-12">
+                <div className="mb-4">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
                 </div>
-
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Pedido #12344
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Realizado em 10/12/2024
-                      </p>
-                    </div>
-                    <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Em Transporte
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 mb-4">
-                    <img
-                      src="https://images.unsplash.com/photo-1581147036324-c1c89c2c8b5c?w=100&h=100&fit=crop"
-                      alt="Serra Circular"
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
-                        Serra Circular 185mm 1800W
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        Quantidade: 1
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">
-                        R$ 599,90
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Total: R$ 599,90
-                    </p>
-                    <a
-                      href="/meus-pedidos/12344"
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      Ver Detalhes
-                    </a>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Nenhum pedido encontrado
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Você ainda não realizou nenhum pedido. Faça sua primeira compra!
+                </p>
                 <a
-                  href="/meus-pedidos"
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  href="/produtos"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                 >
-                  Ver Todos os Pedidos
+                  Ver Produtos
                 </a>
               </div>
             </div>
