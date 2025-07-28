@@ -10,7 +10,7 @@ export interface Product {
   stock: number;
   rating: number;
   reviews: number;
-  brand?: string;
+  brand: string;
   inStock?: boolean;
   category?: string;
   specifications?: string[];

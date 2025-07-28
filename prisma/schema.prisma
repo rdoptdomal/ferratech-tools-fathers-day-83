@@ -24,7 +24,7 @@ model Product {
   variations  Json?     // Ex: { "Cor": ["Ouro Antique", "Cromado"], "Tamanho": ["35mm", "40mm"] }
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   categoryId  String    @db.ObjectId
-  brand       String?
+  brand       String    @default("Sem marca")
   rating      Float     @default(0)
   reviews     Int       @default(0)
   features    String[]
