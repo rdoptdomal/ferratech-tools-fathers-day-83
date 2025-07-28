@@ -1,48 +1,73 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
 import ProductDetailPage from '@/components/ProductDetailPage';
 
-interface ProductDetailProps {
-  params: { slug: string };
-}
-
-export async function generateMetadata({ params }: ProductDetailProps): Promise<Metadata> {
+// Função para buscar o produto
+async function getProduct(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${params.slug}`);
-    if (!response.ok) {
-      return {
-        title: 'Produto não encontrado',
-        description: 'O produto solicitado não foi encontrado.'
-      };
-    }
-
-    const product = await response.json();
-
-    return {
-      title: `${product.name} | FerraTech`,
-      description: product.shortDescription || product.description,
-      openGraph: {
-        title: `${product.name} | FerraTech`,
-        description: product.shortDescription || product.description,
-        images: product.images,
-        type: 'website',
-      },
-    };
+    return await prisma.product.findUnique({
+      where: { slug },
+      include: { category: true }
+    });
   } catch (error) {
-    return {
-      title: 'Produto | FerraTech',
-      description: 'Detalhes do produto.'
-    };
+    console.error('Erro ao buscar produto:', error);
+    return null;
   }
 }
 
-export default function ProductDetail({ params }: ProductDetailProps) {
-  return (
-    <Suspense fallback={<ProductDetailSkeleton />}>
-      <ProductDetailPage slug={params.slug} />
-    </Suspense>
-  );
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = await getProduct(params.slug);
+  
+  if (!product) {
+    return {
+      title: 'Produto não encontrado | FerraTech',
+      description: 'O produto que você está procurando não foi encontrado.',
+    };
+  }
+
+  return {
+    title: `${product.name} | FerraTech`,
+    description: product.shortDescription || product.description?.substring(0, 160) || `Confira ${product.name} na FerraTech. Melhores preços e qualidade garantida.`,
+    keywords: `${product.name}, ${product.brand}, ferramentas, ${product.category?.name}, FerraTech`,
+    openGraph: {
+      title: product.name,
+      description: product.shortDescription || product.description?.substring(0, 160),
+      images: product.images.length > 0 ? product.images : ['/hero-banner.jpg'],
+      type: 'product',
+      url: `https://www.ferratech.shop/produto/${product.slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: product.shortDescription || product.description?.substring(0, 160),
+      images: product.images.length > 0 ? product.images : ['/hero-banner.jpg'],
+    },
+    alternates: {
+      canonical: `https://www.ferratech.shop/produto/${product.slug}`,
+    },
+  };
+}
+
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProduct(params.slug);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h1>
+          <p className="text-gray-600 mb-6">O produto que você está procurando não existe ou foi removido.</p>
+          <a href="/produtos" className="text-blue-600 hover:text-blue-800">
+            Ver todos os produtos
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return <ProductDetailPage product={product} />;
 }
 
 function ProductDetailSkeleton() {

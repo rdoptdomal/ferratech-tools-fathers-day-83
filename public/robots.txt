@@ -1,14 +1,25 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://www.ferratech.shop/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Allow important pages
+Allow: /produtos
+Allow: /produto/
+Allow: /categoria/
+Allow: /sobre
+Allow: /contato
+Allow: /politica-privacidade
+Allow: /trocas-devolucoes
+Allow: /faq
+Allow: /termos-uso
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

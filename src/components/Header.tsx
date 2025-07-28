@@ -1,285 +1,224 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { 
-  ShoppingCart, 
-  User, 
-  Menu, 
-  X,
-  Heart,
-  Package,
-  Phone,
-  Mail,
-  ChevronDown
-} from 'lucide-react';
-import { SearchBar } from './SearchBar';
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  children?: Category[];
-  _count?: {
-    products: number;
-  };
-}
+import { ShoppingCart, Heart, User, Menu, X, Search } from 'lucide-react';
+import SearchBar from './SearchBar';
 
 interface HeaderProps {
-  cartItemsCount?: number;
+  categories?: any[];
 }
 
-export default function Header({ cartItemsCount = 0 }: HeaderProps) {
-  const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
+export default function Header({ categories = [] }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Buscar categorias da API
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data || []))
-      .catch(error => {
-        console.error('Erro ao carregar categorias:', error);
-        setCategories([]);
-      });
-  }, []);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-      {/* Top Bar */}
-      <div className="bg-primary text-white py-2">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
-                <span>(11) 99999-9999</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4" />
-                <span>contato@ferratech.shop</span>
-              </div>
+    <header className="bg-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo - SEMPRE volta para home */}
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity" aria-label="Ir para página inicial">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
             </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <Link href="/sobre" className="hover:text-primary-foreground/80">
-                Sobre Nós
-              </Link>
-              <Link href="/contato" className="hover:text-primary-foreground/80">
-                Contato
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Header */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-text-primary">
-              FerraTech
-            </span>
+            <span className="text-xl font-bold text-gray-900">FerraTech</span>
           </Link>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <SearchBar />
-          </div>
-
-          {/* Navigation - Desktop */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            {categories && categories.length > 0 ? (
-              categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="relative"
-                  onMouseEnter={() => setHoveredCategory(category.id)}
-                  onMouseLeave={() => setHoveredCategory(null)}
+          {/* Navegação Desktop */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link 
+              href="/produtos" 
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              aria-label="Ver todos os produtos"
+            >
+              Produtos
+            </Link>
+            {categories && categories.length > 0 && (
+              <div className="relative group">
+                <button 
+                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center"
+                  aria-label="Ver categorias de produtos"
+                  aria-expanded="false"
                 >
-                  <button className="flex items-center space-x-1 text-text-primary hover:text-primary transition-colors">
-                    <span>{category.name}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-
-                  {/* Mega Menu */}
-                  {hoveredCategory === category.id && category.children && category.children.length > 0 && (
-                    <div className="absolute top-full left-0 w-96 bg-white border border-gray-200 rounded-lg shadow-lg p-6 z-50">
-                      <div className="grid grid-cols-2 gap-4">
-                        {category.children.map((subCategory) => (
-                          <Link
-                            key={subCategory.id}
-                            href={`/categoria/${subCategory.slug}`}
-                            className="block p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            <h4 className="font-semibold text-text-primary mb-1">
-                              {subCategory.name}
-                            </h4>
-                            {subCategory._count && (
-                              <p className="text-sm text-gray-500">
-                                {subCategory._count.products} produtos
-                              </p>
-                            )}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  Categorias
+                  <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="py-2">
+                    {categories.slice(0, 8).map((category) => (
+                      <Link
+                        key={category.id}
+                        href={`/categoria/${category.slug}`}
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                        aria-label={`Ver produtos da categoria ${category.name}`}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              ))
-            ) : (
-              // Fallback navigation when categories are not loaded
-              <>
-                <Link href="/produtos" className="text-text-primary hover:text-primary transition-colors">
-                  Produtos
-                </Link>
-                <Link href="/categoria/ferramentas-eletricas" className="text-text-primary hover:text-primary transition-colors">
-                  Ferramentas Elétricas
-                </Link>
-                <Link href="/categoria/ferramentas-manuais" className="text-text-primary hover:text-primary transition-colors">
-                  Ferramentas Manuais
-                </Link>
-              </>
+              </div>
             )}
+            <Link 
+              href="/sobre" 
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              aria-label="Sobre a FerraTech"
+            >
+              Sobre
+            </Link>
+            <Link 
+              href="/contato" 
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              aria-label="Entre em contato conosco"
+            >
+              Contato
+            </Link>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Wishlist */}
-            <button className="hidden md:flex p-2 text-gray-600 hover:text-primary transition-colors">
-              <Heart className="h-5 w-5" />
-            </button>
-
-            {/* Cart */}
-            <Link href="/carrinho" className="relative p-2 text-gray-600 hover:text-primary transition-colors">
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemsCount}
-                </span>
-              )}
-            </Link>
-
-            {/* User */}
-            <Link href="/minha-conta" className="p-2 text-gray-600 hover:text-primary transition-colors">
-              <User className="h-5 w-5" />
-            </Link>
-
-            {/* Mobile Menu Button */}
+          {/* Ações Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={toggleMenu}
-              className="lg:hidden p-2 text-gray-600 hover:text-primary transition-colors"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              aria-label="Abrir busca"
+              aria-expanded={isSearchOpen}
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <Search className="w-5 h-5" />
             </button>
+            <Link 
+              href="/favoritos" 
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              aria-label="Ver produtos favoritos"
+            >
+              <Heart className="w-5 h-5" />
+            </Link>
+            <Link 
+              href="/carrinho" 
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors relative"
+              aria-label="Ver carrinho de compras"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                0
+              </span>
+            </Link>
+            <Link 
+              href="/minha-conta" 
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              aria-label="Acessar minha conta"
+            >
+              <User className="w-5 h-5" />
+            </Link>
           </div>
+
+          {/* Botão Mobile */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            aria-label="Abrir menu de navegação"
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden bg-white border-t">
-          <div className="container mx-auto px-4 py-4">
-            {/* Mobile Search */}
-            <div className="mb-4">
-              <SearchBar />
-            </div>
+        {/* Busca Desktop */}
+        {isSearchOpen && (
+          <div className="py-4 border-t border-gray-200">
+            <SearchBar onClose={() => setIsSearchOpen(false)} />
+          </div>
+        )}
 
-            {/* Mobile Navigation */}
-            <nav className="space-y-2">
-              {categories && categories.length > 0 ? (
-                categories.map((category) => (
-                  <div key={category.id}>
+        {/* Menu Mobile */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link
+                href="/"
+                className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Ir para página inicial"
+              >
+                Home
+              </Link>
+              <Link
+                href="/produtos"
+                className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Ver todos os produtos"
+              >
+                Produtos
+              </Link>
+              {categories && categories.length > 0 && (
+                <div>
+                  <div className="px-3 py-2 text-sm font-medium text-gray-500">Categorias</div>
+                  {categories.slice(0, 6).map((category) => (
                     <Link
+                      key={category.id}
                       href={`/categoria/${category.slug}`}
-                      className="block py-2 text-text-primary hover:text-primary transition-colors"
+                      className="block px-6 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
+                      aria-label={`Ver produtos da categoria ${category.name}`}
                     >
                       {category.name}
                     </Link>
-                    {category.children && category.children.length > 0 && (
-                      <div className="ml-4 space-y-1">
-                        {category.children.map((subCategory) => (
-                          <Link
-                            key={subCategory.id}
-                            href={`/categoria/${subCategory.slug}`}
-                            className="block py-1 text-sm text-gray-600 hover:text-primary transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {subCategory.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                // Fallback mobile navigation
-                <>
-                  <Link
-                    href="/produtos"
-                    className="block py-2 text-text-primary hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Produtos
-                  </Link>
-                  <Link
-                    href="/categoria/ferramentas-eletricas"
-                    className="block py-2 text-text-primary hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Ferramentas Elétricas
-                  </Link>
-                  <Link
-                    href="/categoria/ferramentas-manuais"
-                    className="block py-2 text-text-primary hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Ferramentas Manuais
-                  </Link>
-                </>
+                  ))}
+                </div>
               )}
-            </nav>
-
-            {/* Mobile Actions */}
-            <div className="mt-6 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/minha-conta"
-                  className="flex items-center space-x-2 text-text-primary hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <User className="h-5 w-5" />
-                  <span>Minha Conta</span>
-                </Link>
-                <Link
-                  href="/carrinho"
-                  className="flex items-center space-x-2 text-text-primary hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Carrinho</span>
-                  {cartItemsCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemsCount}
+              <Link
+                href="/sobre"
+                className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Sobre a FerraTech"
+              >
+                Sobre
+              </Link>
+              <Link
+                href="/contato"
+                className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Entre em contato conosco"
+              >
+                Contato
+              </Link>
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex space-x-4 px-3">
+                  <Link
+                    href="/favoritos"
+                    className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label="Ver produtos favoritos"
+                  >
+                    <Heart className="w-5 h-5" />
+                  </Link>
+                  <Link
+                    href="/carrinho"
+                    className="p-2 text-gray-600 hover:text-blue-600 transition-colors relative"
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label="Ver carrinho de compras"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      0
                     </span>
-                  )}
-                </Link>
+                  </Link>
+                  <Link
+                    href="/minha-conta"
+                    className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label="Acessar minha conta"
+                  >
+                    <User className="w-5 h-5" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 } 

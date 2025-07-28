@@ -19,7 +19,11 @@ interface SearchResult {
   shortDescription?: string;
 }
 
-export function SearchBar() {
+interface SearchBarProps {
+  onClose?: () => void;
+}
+
+export default function SearchBar({ onClose }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,13 +38,14 @@ export function SearchBar() {
 
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/products?search=${encodeURIComponent(query)}&limit=6`);
         if (response.ok) {
           const data = await response.json();
           setResults(data.products || []);
         }
       } catch (error) {
         console.error('Erro na busca:', error);
+        setResults([]);
       } finally {
         setIsLoading(false);
       }
@@ -55,6 +60,13 @@ export function SearchBar() {
     if (query.trim()) {
       window.location.href = `/produtos?search=${encodeURIComponent(query)}`;
     }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setQuery('');
+    setResults([]);
+    onClose?.();
   };
 
   return (
@@ -104,10 +116,7 @@ export function SearchBar() {
                 <Link
                   key={product.id}
                   href={`/produto/${product.slug}`}
-                  onClick={() => {
-                    setIsOpen(false);
-                    setQuery('');
-                  }}
+                  onClick={handleClose}
                   className="block"
                 >
                   <Card className="mb-2 hover:bg-gray-50 transition-colors cursor-pointer">
@@ -119,6 +128,7 @@ export function SearchBar() {
                             alt={product.name}
                             fill
                             className="object-cover rounded"
+                            sizes="48px"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -132,7 +142,7 @@ export function SearchBar() {
                             <span className="text-sm font-semibold text-green-600">
                               R$ {product.price.toFixed(2).replace('.', ',')}
                             </span>
-                            {product.originalPrice && (
+                            {product.originalPrice && product.originalPrice > product.price && (
                               <span className="text-xs text-gray-400 line-through ml-2">
                                 R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                               </span>
@@ -148,7 +158,7 @@ export function SearchBar() {
                 <div className="p-3 text-center border-t">
                   <Link
                     href={`/produtos?search=${encodeURIComponent(query)}`}
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
                     Ver todos os {results.length} resultados
@@ -169,7 +179,7 @@ export function SearchBar() {
       {isOpen && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
         />
       )}
     </div>

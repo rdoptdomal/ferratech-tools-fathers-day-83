@@ -1,42 +1,86 @@
 import { Suspense } from 'react';
+import { prisma } from '@/lib/prisma';
 import HomePage from '@/components/HomePage';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
-export default function Page() {
-  return (
-    <Suspense fallback={<HomePageSkeleton />}>
-      <HomePage />
-    </Suspense>
-  );
+function normalizeSpecifications(spec: any): string[] | undefined {
+  if (!spec) return undefined;
+  if (Array.isArray(spec) && spec.every((item) => typeof item === 'string')) {
+    return spec as string[];
+  }
+  if (typeof spec === 'object' && !Array.isArray(spec)) {
+    // Se for um objeto, transforma em array de "chave: valor"
+    return Object.entries(spec).map(([k, v]) => `${k}: ${v}`);
+  }
+  return undefined;
 }
 
-function HomePageSkeleton() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="animate-pulse">
-        {/* Hero Section Skeleton */}
-        <div className="bg-gradient-to-r from-primary to-primary/90 text-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="h-12 bg-white/20 rounded w-1/3 mb-4"></div>
-            <div className="h-8 bg-white/20 rounded w-1/2 mb-8"></div>
-            <div className="h-4 bg-white/20 rounded w-2/3"></div>
-          </div>
-        </div>
+async function getFeaturedProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        isFeatured: true
+      },
+      include: {
+        category: true
+      },
+      take: 8,
+      orderBy: [
+        { isFeatured: 'desc' },
+        { rating: 'desc' }
+      ]
+    });
 
-        {/* Products Grid Skeleton */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg p-4">
-                <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+    // Garantir que produtos tenham imagens válidas, originalPrice, brand e specifications nunca sejam null
+    return products.map(product => {
+      const { originalPrice, brand, category, specifications, ...rest } = product;
+      return {
+        ...rest,
+        images: product.images && product.images.length > 0 
+          ? product.images 
+          : ['https://images.unsplash.com/photo-1581147036324-c1c89c2c8b5c?w=800&h=600&fit=crop'],
+        originalPrice: originalPrice === null ? undefined : originalPrice,
+        brand: brand === null ? 'Sem marca' : brand,
+        category: category ? category.name : undefined,
+        specifications: normalizeSpecifications(specifications)
+      };
+    });
+  } catch (error) {
+    console.error('Erro ao buscar produtos em destaque:', error);
+    return [];
+  }
+}
+
+async function getCategories() {
+  try {
+    return await prisma.category.findMany({
+      where: { isActive: true },
+      take: 6,
+      orderBy: { name: 'asc' }
+    });
+  } catch (error) {
+    console.error('Erro ao buscar categorias:', error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const [featuredProducts, categories] = await Promise.all([
+    getFeaturedProducts(),
+    getCategories()
+  ]);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header categories={categories} />
+      <main className="flex-1">
+        <Suspense fallback={<div>Carregando...</div>}>
+          <HomePage featuredProducts={featuredProducts} categories={categories} />
+        </Suspense>
+      </main>
+      <Footer />
     </div>
   );
 } 

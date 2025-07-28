@@ -5,6 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // Testar conexão com banco primeiro
+    await prisma.$connect();
+    console.log('✅ Conexão com banco estabelecida');
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const page = parseInt(searchParams.get('page') || '1');
@@ -75,10 +79,18 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Encontrados ${products.length} produtos de ${totalProducts} total`);
 
+    // Verificar se produtos têm imagens válidas
+    const productsWithValidImages = products.map(product => ({
+      ...product,
+      images: product.images && product.images.length > 0 
+        ? product.images 
+        : ['https://images.unsplash.com/photo-1581147036324-c1c89c2c8b5c?w=800&h=600&fit=crop']
+    }));
+
     const totalPages = Math.ceil(totalProducts / limit);
 
     return NextResponse.json({
-      products,
+      products: productsWithValidImages,
       totalPages,
       currentPage: page,
       totalProducts,
@@ -89,7 +101,31 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Erro ao buscar produtos:', error);
     
-    // Retornar produtos mockados em caso de erro
+    // Tentar buscar produtos básicos sem filtros complexos
+    try {
+      const basicProducts = await prisma.product.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        take: 20,
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (basicProducts.length > 0) {
+        console.log(`✅ Recuperados ${basicProducts.length} produtos básicos`);
+        return NextResponse.json({
+          products: basicProducts,
+          totalPages: 1,
+          currentPage: 1,
+          totalProducts: basicProducts.length,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+      }
+    } catch (fallbackError) {
+      console.error('❌ Erro no fallback:', fallbackError);
+    }
+    
+    // Último recurso: produtos mockados
     const mockProducts = [
       {
         id: '1',
