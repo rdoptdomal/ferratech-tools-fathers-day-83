@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 export default function CategoryPageWrapper({ params, searchParams }: CategoryPageProps) {
   return (
     <Suspense fallback={<CategoryPageSkeleton />}>
-      <CategoryPage slug={params.slug} searchParams={searchParams} />
+      <CategoryPage slug={params.slug} />
     </Suspense>
   );
 }

@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { products, categories, type Product } from "@/data/products";
+import { products, categories } from "@/data/products";
+import { Product } from "@/types";
 
 const AdminPanel = () => {
   const [productList, setProductList] = useState<Product[]>(products);
@@ -28,7 +29,7 @@ const AdminPanel = () => {
     specifications: [],
     inStock: true,
     rating: 4.5,
-    image: "",
+    images: [""],
     detailedSpecs: {
       power: "",
       voltage: "",
@@ -54,11 +55,14 @@ const AdminPanel = () => {
     const productToSave: Product = {
       id: editingProduct?.id || Date.now().toString(),
       name: newProduct.name!,
+      slug: newProduct.name!.toLowerCase().replace(/\s+/g, '-'),
       description: newProduct.description!,
       price: newProduct.price!,
       originalPrice: newProduct.originalPrice || undefined,
-      image: newProduct.image || "/placeholder-product.jpg",
+      images: newProduct.images || ["/placeholder-product.jpg"],
+      stock: 0,
       rating: newProduct.rating || 4.5,
+      reviews: 0,
       specifications: newProduct.specifications || [],
       brand: newProduct.brand!,
       inStock: newProduct.inStock!,
@@ -93,7 +97,7 @@ const AdminPanel = () => {
       specifications: [],
       inStock: true,
       rating: 4.5,
-      image: "",
+      images: [""],
       detailedSpecs: { warranty: "12 meses", includes: [] }
     });
     setEditingProduct(null);
@@ -119,7 +123,7 @@ const AdminPanel = () => {
       <g:title>${product.name}</g:title>
       <g:description>${product.description}</g:description>
       <g:link>https://ferratech.com.br/product/${product.id}</g:link>
-      <g:image_link>https://ferratech.com.br${product.image}</g:image_link>
+      <g:image_link>https://ferratech.com.br${product.images[0]}</g:image_link>
       <g:condition>new</g:condition>
       <g:availability>${product.inStock ? 'in_stock' : 'out_of_stock'}</g:availability>
       <g:price>${product.price.toFixed(2)} BRL</g:price>
@@ -208,8 +212,8 @@ const AdminPanel = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="aspect-square bg-gray-100 rounded-lg mb-4 p-4 flex items-center justify-center">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.images[0]}
                         alt={product.name}
                         className="max-w-full max-h-full object-contain"
                       />
@@ -387,8 +391,8 @@ const AdminPanel = () => {
                   <Label htmlFor="image">URL da Imagem</Label>
                   <Input
                     id="image"
-                    value={newProduct.image}
-                    onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
+                    value={newProduct.images?.[0] || ""}
+                    onChange={(e) => setNewProduct(prev => ({ ...prev, images: [e.target.value] }))}
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>

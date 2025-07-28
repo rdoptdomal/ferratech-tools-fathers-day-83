@@ -1,216 +1,115 @@
+import { useRouter } from "next/navigation";
+import { Shield, Award, Users, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const About = () => {
-  const [cartItems] = useState([]);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header cartItemsCount={cartItems.length} />
+    <div className="min-h-screen bg-gray-50">
+      <Header />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            52 Anos de Tradição
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-90">
-            A Ferratech é sinônimo de qualidade e confiança no mercado de ferramentas
-          </p>
-          <Button variant="secondary" size="lg" onClick={() => navigate('/products')}>
-            Conheça Nossos Produtos
-          </Button>
-        </div>
-      </section>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold text-center mb-8">Sobre a FerraTech</h1>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Nossa História</h2>
+            <p className="text-gray-600 mb-4">
+              A FerraTech nasceu da paixão por ferramentas de qualidade e do compromisso 
+              em oferecer o melhor para profissionais e entusiastas do "faça você mesmo". 
+              Com mais de 50 anos de experiência no mercado, construímos uma reputação 
+              sólida baseada na confiança e na qualidade dos nossos produtos.
+            </p>
+            <p className="text-gray-600">
+              Nossa missão é fornecer ferramentas profissionais que realmente fazem a 
+              diferença no seu trabalho, com preços justos e um atendimento excepcional.
+            </p>
+          </div>
 
-      {/* Nossa História */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Nossa História</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <Shield className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Qualidade Garantida</h3>
+              <p className="text-gray-600">
+                Todos os nossos produtos possuem garantia de fábrica e são testados 
+                rigorosamente antes de chegar até você.
+              </p>
+            </div>
             
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Fundada em 1972, a Ferratech nasceu do sonho de dois irmãos apaixonados por ferramentas e tecnologia. Começamos como uma pequena loja de ferramentas manuais e, ao longo de mais de cinco décadas, nos tornamos referência no mercado nacional.
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <Award className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Melhor Preço</h3>
+              <p className="text-gray-600">
+                Oferecemos os melhores preços do mercado, com promoções especiais e 
+                descontos exclusivos para nossos clientes.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <Users className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Atendimento Personalizado</h3>
+              <p className="text-gray-600">
+                Nossa equipe está sempre pronta para ajudar você a encontrar a ferramenta 
+                perfeita para o seu projeto.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <Clock className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Entrega Rápida</h3>
+              <p className="text-gray-600">
+                Entregamos em todo o Brasil com agilidade e segurança, para que você 
+                não perca tempo esperando.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Nossos Valores</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-primary">Qualidade</h3>
+                <p className="text-gray-600">
+                  Trabalhamos apenas com as melhores marcas e produtos de alta qualidade, 
+                  garantindo durabilidade e performance.
                 </p>
-                
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Nossa missão sempre foi democratizar o acesso a ferramentas de qualidade profissional, oferecendo produtos que atendem desde o profissional mais exigente até o usuário doméstico que busca durabilidade e precisão.
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-primary/10 rounded-lg">
-                    <div className="text-3xl font-bold text-primary">52+</div>
-                    <div className="text-sm text-muted-foreground">Anos de mercado</div>
-                  </div>
-                  <div className="text-center p-4 bg-primary/10 rounded-lg">
-                    <div className="text-3xl font-bold text-primary">500K+</div>
-                    <div className="text-sm text-muted-foreground">Clientes atendidos</div>
-                  </div>
-                </div>
               </div>
-              
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <div className="text-4xl mb-2">🏆</div>
-                    <CardTitle>Tradição e Qualidade</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Mais de meio século oferecendo as melhores ferramentas do mercado.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <div className="text-4xl mb-2">🔧</div>
-                    <CardTitle>Expertise Técnica</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Nossa equipe possui conhecimento técnico para te ajudar na escolha ideal.
-                    </p>
-                  </CardContent>
-                </Card>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-primary">Confiança</h3>
+                <p className="text-gray-600">
+                  Construímos relacionamentos duradouros baseados na transparência e 
+                  no compromisso com nossos clientes.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-primary">Inovação</h3>
+                <p className="text-gray-600">
+                  Estamos sempre atentos às novas tecnologias e tendências do mercado, 
+                  oferecendo produtos modernos e eficientes.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-primary">Sustentabilidade</h3>
+                <p className="text-gray-600">
+                  Comprometidos com o meio ambiente, priorizamos produtos e práticas 
+                  sustentáveis em nossas operações.
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Nossos Valores */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Nossos Valores</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="text-6xl mb-4">💎</div>
-                <CardTitle>Qualidade</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Selecionamos apenas produtos que atendem aos mais altos padrões de qualidade e durabilidade.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center">
-              <CardHeader>
-                <div className="text-6xl mb-4">🤝</div>
-                <CardTitle>Confiança</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Construímos relacionamentos duradouros baseados na transparência e honestidade.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center">
-              <CardHeader>
-                <div className="text-6xl mb-4">⚡</div>
-                <CardTitle>Inovação</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Sempre buscamos as mais modernas tecnologias para oferecer o melhor aos nossos clientes.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="text-center">
+            <button 
+              onClick={() => router.push('/products')}
+              className="bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors"
+            >
+              Conheça Nossos Produtos
+            </button>
           </div>
         </div>
-      </section>
-
-      {/* Nossos Diferenciais */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Por que escolher a Ferratech?</h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center space-y-4">
-              <div className="text-5xl">🚚</div>
-              <h3 className="font-bold text-lg">Frete Grátis</h3>
-              <p className="text-muted-foreground">Para compras acima de R$ 199 em todo o Brasil</p>
-              <Badge variant="secondary">Entrega rápida</Badge>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="text-5xl">🛡️</div>
-              <h3 className="font-bold text-lg">Garantia Estendida</h3>
-              <p className="text-muted-foreground">12 meses em todos os produtos + suporte técnico</p>
-              <Badge variant="secondary">Assistência especializada</Badge>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="text-5xl">💳</div>
-              <h3 className="font-bold text-lg">Parcelamento</h3>
-              <p className="text-muted-foreground">Até 12x sem juros nos cartões de crédito</p>
-              <Badge variant="secondary">Sem taxas adicionais</Badge>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="text-5xl">📞</div>
-              <h3 className="font-bold text-lg">Atendimento</h3>
-              <p className="text-muted-foreground">Suporte especializado de segunda a sexta</p>
-              <Badge variant="secondary">08:00 às 18:00</Badge>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contato */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8">Entre em Contato</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
-            <div>
-              <div className="text-4xl mb-4">📍</div>
-              <h3 className="font-bold text-lg mb-2">Endereço</h3>
-              <p className="opacity-90">
-                Rua das Ferramentas, 1972<br />
-                Centro, São Paulo - SP<br />
-                CEP: 01234-567
-              </p>
-            </div>
-            
-            <div>
-              <div className="text-4xl mb-4">📞</div>
-              <h3 className="font-bold text-lg mb-2">Telefone</h3>
-              <p className="opacity-90">
-                (11) 1234-5678<br />
-                WhatsApp: (11) 99999-8888<br />
-                Seg-Sex: 08:00-18:00
-              </p>
-            </div>
-            
-            <div>
-              <div className="text-4xl mb-4">✉️</div>
-              <h3 className="font-bold text-lg mb-2">E-mail</h3>
-              <p className="opacity-90">
-                contato@ferratech.com.br<br />
-                vendas@ferratech.com.br<br />
-                suporte@ferratech.com.br
-              </p>
-            </div>
-          </div>
-          
-          <Button variant="secondary" size="lg" onClick={() => navigate('/products')}>
-            Explore Nossos Produtos
-          </Button>
-        </div>
-      </section>
+      </div>
 
       <Footer />
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ const Auth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     // Set up auth state listener
@@ -24,7 +24,7 @@ const Auth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          navigate('/');
+          router.push('/');
         }
       }
     );
@@ -35,12 +35,12 @@ const Auth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        navigate('/');
+        router.push('/');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [router]);
 
   const signUp = async (email: string, password: string) => {
     setLoading(true);
@@ -212,11 +212,11 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link to="/" className="inline-block">
+          <button onClick={() => router.push('/')} className="inline-block">
             <div className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground px-6 py-3 rounded-lg font-bold text-2xl">
               FERRATECH
             </div>
-          </Link>
+          </button>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Sua conta Ferratech
           </h2>
@@ -249,12 +249,12 @@ const Auth = () => {
             </Tabs>
 
             <div className="mt-6 text-center">
-              <Link 
-                to="/" 
+              <button 
+                onClick={() => router.push('/')}
                 className="text-sm text-primary hover:text-primary/80 transition-colors"
               >
                 ← Voltar para a loja
-              </Link>
+              </button>
             </div>
           </CardContent>
         </Card>

@@ -2,24 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, Star, Truck, Shield, CreditCard, Award } from 'lucide-react';
+import { ChevronRight, Shield, CreditCard, Award, Truck } from 'lucide-react';
+import ProductCard from './ProductCard';
 import Header from './Header';
 import Footer from './Footer';
-import ProductCard from './ProductCard';
-
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  variations?: any;
-  stock: number;
-  rating: number;
-  reviews: number;
-  brand?: string;
-}
+import HeroBanner from './HeroBanner';
+import { Product } from '@/types';
 
 export default function HomePage() {
   const router = useRouter();
@@ -47,33 +35,7 @@ export default function HomePage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-primary/90 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Ferramentas Profissionais
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              A maior loja de ferramentas do Brasil. Qualidade e preços que cabem no seu bolso.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => router.push('/produtos')}
-                className="bg-white text-primary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
-              >
-                Ver Produtos
-                <ChevronRight className="inline ml-2 h-5 w-5" />
-              </button>
-              <button
-                onClick={() => router.push('/categoria/ferramentas-eletricas')}
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-primary transition-colors"
-              >
-                Ferramentas Elétricas
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroBanner />
 
       {/* Features Section */}
       <section className="py-16 bg-white">

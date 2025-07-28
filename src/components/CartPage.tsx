@@ -116,7 +116,7 @@ export default function CartPage() {
                       <div className="text-sm text-gray-600 mb-2">
                         {Object.entries(item.variation).map(([key, value]) => (
                           <span key={key} className="mr-2">
-                            {key}: {value}
+                            {key}: {String(value)}
                           </span>
                         ))}
                       </div>

@@ -2,33 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Filter, Grid3X3, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, Grid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 import Header from './Header';
 import Footer from './Footer';
-
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  variations?: any;
-  stock: number;
-  rating: number;
-  reviews: number;
-  brand?: string;
-}
+import { Product } from '@/types';
 
 interface CategoryPageProps {
   slug: string;
-  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function CategoryPage({ slug, searchParams }: CategoryPageProps) {
+export default function CategoryPage({ slug }: CategoryPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [category, setCategory] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,59 +24,62 @@ export default function CategoryPage({ slug, searchParams }: CategoryPageProps) 
   const [totalProducts, setTotalProducts] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('relevance');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
-  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
-  const search = typeof searchParams.search === 'string' ? searchParams.search : '';
+  const page = parseInt(searchParams?.get('page') || '1');
+  const search = searchParams?.get('search') || '';
 
   useEffect(() => {
-    loadProducts();
-  }, [slug, page, search, sortBy, priceRange]);
+    loadCategoryAndProducts();
+  }, [slug, page, search, sortBy]);
 
-  const loadProducts = async () => {
+  const loadCategoryAndProducts = async () => {
     try {
       setLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams({
-        category: slug,
-        page: page.toString(),
-        limit: '12'
-      });
-
-      if (search) {
-        params.append('search', search);
+      
+      // Carregar categoria
+      const categoryResponse = await fetch(`/api/categories/${slug}`);
+      if (categoryResponse.ok) {
+        const categoryData = await categoryResponse.json();
+        setCategory(categoryData);
       }
 
+      // Carregar produtos da categoria
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12',
+        category: slug,
+        ...(search && { search }),
+        ...(sortBy && { sortBy })
+      });
+
       const response = await fetch(`/api/products?${params}`);
-      
       if (!response.ok) {
-        throw new Error('Falha ao carregar produtos');
+        throw new Error('Erro ao carregar produtos');
       }
 
       const data = await response.json();
-      
-      setProducts(data.products);
-      setTotalPages(data.totalPages);
-      setTotalProducts(data.totalProducts);
-      setCurrentPage(data.currentPage);
-    } catch (error) {
-      console.error('Erro ao carregar produtos:', error);
-      setError('Erro ao carregar produtos. Tente novamente.');
+      setProducts(data.products || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalProducts(data.totalProducts || 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
   };
 
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams as Record<string, string>);
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('page', newPage.toString());
     router.push(`/categoria/${slug}?${params.toString()}`);
   };
 
   const handleSort = (sort: string) => {
     setSortBy(sort);
-    setCurrentPage(1);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('sortBy', sort);
+    params.set('page', '1');
+    router.push(`/categoria/${slug}?${params.toString()}`);
   };
 
   const handleViewModeChange = () => {
@@ -101,15 +92,13 @@ export default function CategoryPage({ slug, searchParams }: CategoryPageProps) 
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Erro ao carregar produtos
-            </h1>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Erro ao carregar categoria</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
             <button
-              onClick={loadProducts}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90"
+              onClick={() => window.location.reload()}
+              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
             >
-              Tentar Novamente
+              Tentar novamente
             </button>
           </div>
         </div>
@@ -121,156 +110,128 @@ export default function CategoryPage({ slug, searchParams }: CategoryPageProps) 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
       <div className="container mx-auto px-4 py-8">
-        {/* Header da Página */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-          </h1>
-          <p className="text-gray-600">
-            {loading ? "Carregando..." : `${totalProducts} produtos encontrados`}
-          </p>
-        </div>
-
-        {/* Filtros e Controles */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          {/* Busca */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Buscar produtos..."
-              defaultValue={search}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+        {/* Header da Categoria */}
+        {category && (
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{category.name}</h1>
+            {category.description && (
+              <p className="text-gray-600 mb-4">{category.description}</p>
+            )}
+            <p className="text-gray-600">
+              {totalProducts} produtos encontrados
+            </p>
           </div>
+        )}
 
-          {/* Controles */}
-          <div className="flex items-center gap-2">
+        {/* Filtros e Ordenação */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
             <select
               value={sortBy}
               onChange={(e) => handleSort(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="relevance">Mais Relevantes</option>
-              <option value="price_asc">Menor Preço</option>
-              <option value="price_desc">Maior Preço</option>
+              <option value="relevance">Mais relevantes</option>
+              <option value="price_asc">Menor preço</option>
+              <option value="price_desc">Maior preço</option>
               <option value="name_asc">Nome A-Z</option>
               <option value="name_desc">Nome Z-A</option>
+              <option value="newest">Mais recentes</option>
             </select>
+          </div>
 
+          <div className="flex items-center gap-2">
             <button
               onClick={handleViewModeChange}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              title={viewMode === 'grid' ? 'Visualização em lista' : 'Visualização em grade'}
             >
-              {viewMode === 'grid' ? (
-                <List className="h-4 w-4" />
+              {viewMode === 'list' ? (
+                <Grid className="h-4 w-4" />
               ) : (
-                <Grid3X3 className="h-4 w-4" />
+                <List className="h-4 w-4" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Grid de Produtos */}
+        {/* Produtos */}
         {loading ? (
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-              : "grid-cols-1"
-          }`}>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+                <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+                <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                <div className="bg-gray-200 h-4 rounded w-2/3"></div>
               </div>
             ))}
           </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Nenhum produto encontrado
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Tente ajustar os filtros ou buscar por outro termo.
-            </p>
-            <button
-              onClick={() => router.push('/produtos')}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90"
-            >
-              Ver Todos os Produtos
-            </button>
+        ) : products.length > 0 ? (
+          <div className={`grid gap-6 ${
+            viewMode === 'grid' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              : 'grid-cols-1'
+          }`}>
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         ) : (
-          <>
-            <div className={`grid gap-6 ${
-              viewMode === 'grid' 
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                : "grid-cols-1"
-            }`}>
-              {products.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product}
-                />
-              ))}
-            </div>
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Nenhum produto encontrado</h3>
+            <p className="text-gray-600 mb-4">
+              Tente ajustar os filtros ou buscar por outro termo.
+            </p>
+          </div>
+        )}
 
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <nav className="flex items-center space-x-2">
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => {
+              const pageNum = i + 1;
+              const isCurrentPage = pageNum === currentPage;
+              const isNearCurrent = Math.abs(pageNum - currentPage) <= 2;
+
+              if (isCurrentPage || isNearCurrent || pageNum === 1 || pageNum === totalPages) {
+                return (
                   <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-3 py-2 border rounded-lg transition-colors ${
+                      isCurrentPage
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    {pageNum}
                   </button>
+                );
+              } else if (pageNum === currentPage - 3 || pageNum === currentPage + 3) {
+                return <span key={pageNum} className="px-2">...</span>;
+              }
+              return null;
+            })}
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(pageNum => 
-                      pageNum === 1 || 
-                      pageNum === totalPages || 
-                      Math.abs(pageNum - currentPage) <= 1
-                    )
-                    .map((pageNum, index, array) => (
-                      <div key={pageNum} className="flex items-center">
-                        {index > 0 && array[index - 1] !== pageNum - 1 && (
-                          <span className="px-2 text-gray-500">...</span>
-                        )}
-                        <button
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 py-2 rounded-lg ${
-                            pageNum === currentPage
-                              ? 'bg-primary text-white'
-                              : 'border border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      </div>
-                    ))}
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </nav>
-              </div>
-            )}
-          </>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         )}
       </div>
-
       <Footer />
     </div>
   );

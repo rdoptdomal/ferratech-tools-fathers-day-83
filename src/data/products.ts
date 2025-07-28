@@ -1,44 +1,23 @@
-import drillMachine from "@/assets/drill-machine.jpg";
-import angleGrinder from "@/assets/angle-grinder.jpg";
-import circularSaw from "@/assets/circular-saw.jpg";
-import hammerDrill from "@/assets/hammer-drill.jpg";
-import screwdriver from "@/assets/screwdriver.jpg";
-import jigsaw from "@/assets/jigsaw.jpg";
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  rating: number;
-  discount?: number;
-  specifications: string[];
-  brand: string;
-  inStock: boolean;
-  category: string;
-  detailedSpecs: {
-    power?: string;
-    voltage?: string;
-    speed?: string;
-    capacity?: string;
-    weight?: string;
-    dimensions?: string;
-    warranty?: string;
-    includes?: string[];
-  };
-}
+import { Product } from '@/types';
+import drillMachine from '@/assets/drill-machine.jpg';
+import angleGrinder from '@/assets/angle-grinder.jpg';
+import circularSaw from '@/assets/circular-saw.jpg';
+import hammerDrill from '@/assets/hammer-drill.jpg';
+import screwdriver from '@/assets/screwdriver.jpg';
+import jigsaw from '@/assets/jigsaw.jpg';
 
 export const products: Product[] = [
   {
     id: "1",
     name: "Furadeira de Impacto 650W Profissional",
+    slug: "furadeira-impacto-650w-profissional",
     description: "Furadeira de impacto robusta com alta potência para trabalhos pesados em alvenaria, madeira e metal.",
     price: 189.90,
     originalPrice: 299.90,
-    image: drillMachine,
+    images: [drillMachine.src],
+    stock: 15,
     rating: 4.8,
+    reviews: 127,
     specifications: [
       "Potência: 650W",
       "Velocidade: 0-3000 RPM",
@@ -62,11 +41,14 @@ export const products: Product[] = [
   {
     id: "2",
     name: "Esmerilhadeira Angular 900W 4.1/2\" Premium",
+    slug: "esmerilhadeira-angular-900w-premium",
     description: "Esmerilhadeira angular de alta performance com sistema de proteção contra poeira e motor potente.",
     price: 149.90,
     originalPrice: 219.90,
-    image: angleGrinder,
+    images: [angleGrinder.src],
+    stock: 8,
     rating: 4.6,
+    reviews: 89,
     specifications: [
       "Potência: 900W",
       "Disco: 4.1/2\" (115mm)",
@@ -90,11 +72,14 @@ export const products: Product[] = [
   {
     id: "3",
     name: "Serra Circular 1200W 7.1/4\" Profissional",
+    slug: "serra-circular-1200w-profissional",
     description: "Serra circular de alta precisão com guia laser e base de alumínio para cortes perfeitos.",
     price: 299.90,
     originalPrice: 449.90,
-    image: circularSaw,
+    images: [circularSaw.src],
+    stock: 12,
     rating: 4.9,
+    reviews: 156,
     specifications: [
       "Potência: 1200W",
       "Lâmina: 7.1/4\" (184mm)",
@@ -118,11 +103,14 @@ export const products: Product[] = [
   {
     id: "4",
     name: "Martelete Perfurador SDS-Plus 800W",
+    slug: "martelete-perfurador-sds-plus-800w",
     description: "Martelete robusto com sistema SDS-Plus para perfuração em concreto e alvenaria pesada.",
     price: 259.90,
     originalPrice: 389.90,
-    image: hammerDrill,
+    images: [hammerDrill.src],
+    stock: 6,
     rating: 4.7,
+    reviews: 93,
     specifications: [
       "Potência: 800W",
       "Sistema: SDS-Plus",
@@ -136,69 +124,75 @@ export const products: Product[] = [
       power: "800W",
       voltage: "220V",
       speed: "0-900 RPM",
-      capacity: "SDS-Plus até 26mm",
-      weight: "2.8kg",
-      dimensions: "32 x 9 x 22 cm",
+      capacity: "SDS-Plus",
+      weight: "2.1kg",
+      dimensions: "32 x 9 x 25 cm",
       warranty: "12 meses",
-      includes: ["Martelete", "Punho auxiliar", "Limitador de profundidade", "Maleta", "Kit 5 brocas SDS"]
+      includes: ["Martelete", "Ponta SDS-Plus", "Punho auxiliar", "Maleta"]
     }
   },
   {
     id: "5",
-    name: "Parafusadeira Furadeira 18V Li-ion Bivolt",
-    description: "Parafusadeira sem fio com bateria de lítio e carregador rápido. Ideal para trabalhos precisos.",
+    name: "Parafusadeira de Impacto 18V Profissional",
+    slug: "parafusadeira-impacto-18v-profissional",
+    description: "Parafusadeira de impacto sem fio com bateria de lítio e torque ajustável para aplicações profissionais.",
     price: 199.90,
     originalPrice: 299.90,
-    image: screwdriver,
+    images: [screwdriver.src],
+    stock: 20,
     rating: 4.8,
+    reviews: 203,
     specifications: [
-      "Tensão: 18V Li-ion",
-      "Torque: 35Nm",
-      "Mandril: 10mm",
-      "Autonomia: até 4 horas"
+      "Voltagem: 18V",
+      "Torque: 0-200 Nm",
+      "Velocidade: 0-3200 RPM",
+      "Bateria: Li-ion 2.0Ah"
     ],
     brand: "Ferratech Pro",
     inStock: true,
     category: "ferramentas-eletricas",
     detailedSpecs: {
-      power: "18V Li-ion",
-      voltage: "Bivolt",
-      speed: "0-400/0-1400 RPM",
-      capacity: "Mandril 10mm",
-      weight: "1.3kg",
-      dimensions: "22 x 7 x 20 cm",
+      power: "18V",
+      voltage: "18V",
+      speed: "0-3200 RPM",
+      capacity: "Torque 200 Nm",
+      weight: "1.2kg",
+      dimensions: "18 x 7 x 15 cm",
       warranty: "12 meses",
-      includes: ["Parafusadeira", "Bateria 18V 2.0Ah", "Carregador bivolt", "Kit 30 bits", "Maleta"]
+      includes: ["Parafusadeira", "Bateria Li-ion", "Carregador", "Maleta"]
     }
   },
   {
     id: "6",
-    name: "Serra Tico-Tico Orbital 650W Profissional",
-    description: "Serra tico-tico com ação orbital e base inclinável para cortes curvos e retos de alta precisão.",
+    name: "Serra Tico-Tico 500W 3.1/2\"",
+    slug: "serra-tico-tico-500w",
+    description: "Serra tico-tico versátil para cortes em madeira, plástico e metal com lâmina de alta durabilidade.",
     price: 179.90,
     originalPrice: 259.90,
-    image: jigsaw,
+    images: [jigsaw.src],
+    stock: 10,
     rating: 4.5,
+    reviews: 67,
     specifications: [
-      "Potência: 650W",
-      "Curso: 23mm",
-      "Frequência: 3000 spm",
-      "Base inclinável até 45°"
+      "Potência: 500W",
+      "Lâmina: 3.1/2\" (89mm)",
+      "Velocidade: 0-3000 SPM",
+      "Corte: 45°"
     ],
     brand: "Ferratech Pro",
     inStock: true,
     category: "ferramentas-eletricas",
     detailedSpecs: {
-      power: "650W",
+      power: "500W",
       voltage: "220V",
-      speed: "500-3000 spm",
-      capacity: "Madeira até 65mm",
-      weight: "2.1kg",
-      dimensions: "25 x 8 x 20 cm",
+      speed: "0-3000 SPM",
+      capacity: "Lâmina 89mm (3.1/2\")",
+      weight: "1.4kg",
+      dimensions: "22 x 8 x 18 cm",
       warranty: "12 meses",
-      includes: ["Serra tico-tico", "Protetor", "Kit 5 lâminas mistas", "Guia paralelo", "Maleta"]
+      includes: ["Serra tico-tico", "Lâmina bimetálica", "Base de corte", "Manual"]
     }
-  },
+  }
 ];
 
 export const categories = [

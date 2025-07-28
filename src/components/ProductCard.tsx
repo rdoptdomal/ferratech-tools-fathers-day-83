@@ -3,21 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
-
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  variations?: any;
-  stock: number;
-  rating: number;
-  reviews: number;
-  brand?: string;
-}
+import { Heart, Star, ShoppingCart } from 'lucide-react';
+import { Product } from '@/types';
 
 interface ProductCardProps {
   product: Product;
@@ -50,7 +37,7 @@ export default function ProductCard({ product, onAddToCart, onAddToWishlist }: P
   };
 
   const handleVariationChange = (key: string, value: string) => {
-    setSelectedVariation(prev => ({
+    setSelectedVariation((prev: any) => ({
       ...prev,
       [key]: value
     }));

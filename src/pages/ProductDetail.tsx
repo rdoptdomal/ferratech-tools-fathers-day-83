@@ -1,34 +1,99 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Star, Heart, ShoppingCart, Truck, Shield, CreditCard, ChevronLeft, Plus, Minus } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
-import { getProductById, products, type Product } from "@/data/products";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Star, ShoppingCart, Heart, Truck, Shield, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Product } from "@/types";
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
-  const product = id ? getProductById(id) : null;
+  useEffect(() => {
+    // Simular carregamento do produto
+    const fetchProduct = async () => {
+      try {
+        // Aqui você faria a chamada real para a API
+        const mockProduct: Product = {
+          id: "1",
+          name: "Furadeira de Impacto 650W Profissional",
+          slug: "furadeira-impacto-650w-profissional",
+          description: "Furadeira de impacto robusta com alta potência para trabalhos pesados em alvenaria, madeira e metal. Ideal para profissionais que precisam de ferramentas confiáveis e duráveis.",
+          price: 189.90,
+          originalPrice: 299.90,
+          images: [
+            "https://images.unsplash.com/photo-1581147033415-3ec054d3c3b7?w=800",
+            "https://images.unsplash.com/photo-1581147033415-3ec054d3c3b7?w=800",
+            "https://images.unsplash.com/photo-1581147033415-3ec054d3c3b7?w=800"
+          ],
+          stock: 15,
+          rating: 4.8,
+          reviews: 127,
+          brand: "Ferratech Pro",
+          inStock: true,
+          category: "ferramentas-eletricas",
+          specifications: [
+            "Potência: 650W",
+            "Velocidade: 0-3000 RPM",
+            "Mandril: 13mm",
+            "Função impacto: 48.000 IPM",
+            "Peso: 1.8kg",
+            "Garantia: 12 meses"
+          ],
+          detailedSpecs: {
+            power: "650W",
+            voltage: "220V",
+            speed: "0-3000 RPM",
+            capacity: "Mandril 13mm",
+            weight: "1.8kg",
+            dimensions: "25 x 8 x 22 cm",
+            warranty: "12 meses",
+            includes: ["Furadeira", "Mandril com chave", "Punho auxiliar", "Limitador de profundidade", "Maleta"]
+          }
+        };
+        
+        setProduct(mockProduct);
+      } catch (error) {
+        console.error('Erro ao carregar produto:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!product) {
+    fetchProduct();
+  }, []);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    toast({
+      title: "Produto adicionado!",
+      description: `${product.name} foi adicionado ao carrinho.`,
+    });
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    
+    handleAddToCart();
+    router.push('/checkout');
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header cartItemsCount={cartItems.length} />
-        <div className="flex-1 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Produto não encontrado</h1>
-            <Button onClick={() => navigate("/")}>Voltar à página inicial</Button>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando produto...</p>
           </div>
         </div>
         <Footer />
@@ -36,301 +101,218 @@ const ProductDetail = () => {
     );
   }
 
-  const handleAddToCart = (productToAdd: Product, qty = quantity) => {
-    for (let i = 0; i < qty; i++) {
-      setCartItems(prev => [...prev, productToAdd]);
-    }
-    toast({
-      title: "Produto adicionado!",
-      description: `${qty}x ${productToAdd.name} adicionado ao carrinho.`,
-    });
-  };
-
-  const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
-
-  const installmentPrice = (product.price / 12).toFixed(2);
-  const pixPrice = (product.price * 0.95).toFixed(2);
-
-  // Related products (same category, excluding current)
-  const relatedProducts = products
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Produto não encontrado</h1>
+            <p className="text-gray-600 mb-4">O produto que você está procurando não foi encontrado.</p>
+            <Button onClick={() => router.push('/products')}>
+              Voltar aos Produtos
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header cartItemsCount={cartItems.length} />
+    <div className="min-h-screen bg-gray-50">
+      <Header />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <button onClick={() => navigate("/")} className="hover:text-primary">
-            Início
-          </button>
-          <span>/</span>
-          <button onClick={() => navigate("/products")} className="hover:text-primary">
-            Produtos
-          </button>
-          <span>/</span>
-          <span>{product.name}</span>
-        </div>
+        <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="mb-8">
+            <ol className="flex items-center space-x-2 text-sm text-gray-600">
+              <li>
+                <button onClick={() => router.push('/')} className="hover:text-primary">
+                  Início
+                </button>
+              </li>
+              <li>/</li>
+              <li>
+                <button onClick={() => router.push('/products')} className="hover:text-primary">
+                  Produtos
+                </button>
+              </li>
+              <li>/</li>
+              <li className="text-gray-900">{product.name}</li>
+            </ol>
+          </nav>
 
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          {/* Product Image */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center p-8 relative">
-              {discountPercent > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute top-4 right-4 text-lg px-3 py-1"
-                >
-                  -{discountPercent}%
-                </Badge>
-              )}
-              <img
-                src={product.image}
-                alt={product.name}
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <p className="text-muted-foreground mb-2">{product.brand}</p>
-              <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Galeria de Imagens */}
+            <div className="space-y-4">
+              <div className="aspect-square bg-white rounded-lg overflow-hidden">
+                <img
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(product.rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
+              {product.images.length > 1 && (
+                <div className="flex space-x-2">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                        selectedImage === index ? 'border-primary' : 'border-gray-300'
                       }`}
-                    />
+                    >
+                      <img
+                        src={image}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  ({product.rating}) - 127 avaliações
-                </span>
-              </div>
-
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                {product.description}
-              </p>
-            </div>
-
-            {/* Price */}
-            <div className="space-y-3 p-6 bg-gray-50 rounded-lg">
-              {product.originalPrice && (
-                <div className="text-lg text-muted-foreground line-through">
-                  De: R$ {product.originalPrice.toFixed(2).replace(".", ",")}
-                </div>
               )}
-              <div className="text-4xl font-bold text-primary">
-                R$ {product.price.toFixed(2).replace(".", ",")}
-              </div>
-              <div className="space-y-2">
-                <div className="text-muted-foreground">
-                  12x de R$ {installmentPrice.replace(".", ",")} sem juros
-                </div>
-                <div className="text-lg font-semibold text-success">
-                  💳 R$ {pixPrice.replace(".", ",")} no PIX (5% OFF)
-                </div>
-              </div>
             </div>
 
-            {/* Quantity and Actions */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <label className="font-medium">Quantidade:</label>
-                <div className="flex items-center border rounded-md">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="h-10 w-10"
+            {/* Informações do Produto */}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-gray-600">({product.reviews} avaliações)</span>
+                </div>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-3xl font-bold text-primary">
+                    R$ {product.price.toFixed(2)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-xl text-gray-500 line-through">
+                      R$ {product.originalPrice.toFixed(2)}
+                    </span>
+                  )}
+                  {product.originalPrice && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-gray-600 mb-4">{product.description}</p>
+                
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-600">Frete grátis para compras acima de R$ 199</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-600">Garantia de 12 meses</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm text-gray-600">Produto original com nota fiscal</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Controles de Compra */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border rounded-lg">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="px-3 py-2 hover:bg-gray-100"
+                    >
+                      -
+                    </button>
+                    <span className="px-4 py-2 border-x">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="px-3 py-2 hover:bg-gray-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                  
+                  <span className="text-sm text-gray-600">
+                    {product.stock} unidades disponíveis
+                  </span>
+                </div>
+
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={handleAddToCart}
+                    className="flex-1"
+                    size="lg"
                   >
-                    <Minus className="h-4 w-4" />
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Adicionar ao Carrinho
                   </Button>
-                  <span className="px-4 py-2 min-w-12 text-center">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="h-10 w-10"
+                  
+                  <Button 
+                    onClick={handleBuyNow}
+                    variant="outline"
+                    size="lg"
                   >
-                    <Plus className="h-4 w-4" />
+                    Comprar Agora
                   </Button>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="success"
-                  size="lg"
-                  className="flex-1"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Adicionar ao Carrinho
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setIsFavorite(!isFavorite)}
-                >
-                  <Heart
-                    className={`h-5 w-5 ${
-                      isFavorite ? "fill-red-500 text-red-500" : ""
-                    }`}
-                  />
-                </Button>
-              </div>
-
-              <Button variant="hero" size="lg" className="w-full">
-                Comprar Agora
-              </Button>
-            </div>
-
-            {/* Benefits */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t">
-              <div className="flex items-center gap-3">
-                <Truck className="h-5 w-5 text-primary" />
-                <div className="text-sm">
-                  <div className="font-medium">Frete Grátis</div>
-                  <div className="text-muted-foreground">Acima de R$ 199</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-primary" />
-                <div className="text-sm">
-                  <div className="font-medium">Garantia</div>
-                  <div className="text-muted-foreground">12 meses</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <div className="text-sm">
-                  <div className="font-medium">Parcelamento</div>
-                  <div className="text-muted-foreground">12x sem juros</div>
+                  
+                  <Button variant="ghost" size="lg">
+                    <Heart className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Product Details Tabs */}
-        <Tabs defaultValue="specs" className="mb-16">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="specs">Especificações</TabsTrigger>
-            <TabsTrigger value="description">Descrição</TabsTrigger>
-            <TabsTrigger value="reviews">Avaliações (127)</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="specs" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Especificações Técnicas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(product.detailedSpecs).map(([key, value]) => (
+          {/* Especificações */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Especificações Técnicas</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Características</h3>
+                <ul className="space-y-2">
+                  {(product.specifications || []).map((spec, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary mt-1">✓</span>
+                      {spec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Especificações Detalhadas</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(product.detailedSpecs || {}).map(([key, value]) => (
                     <div key={key} className="space-y-2">
-                      <dt className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                        {key === 'power' && 'Potência'}
-                        {key === 'voltage' && 'Voltagem'}
-                        {key === 'speed' && 'Velocidade'}
-                        {key === 'capacity' && 'Capacidade'}
-                        {key === 'weight' && 'Peso'}
-                        {key === 'dimensions' && 'Dimensões'}
-                        {key === 'warranty' && 'Garantia'}
-                        {key === 'includes' && 'Inclui'}
-                      </dt>
-                      <dd className="text-foreground">
-                        {Array.isArray(value) ? (
-                          <ul className="list-disc list-inside space-y-1">
-                            {value.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          value
-                        )}
-                      </dd>
+                      <span className="text-sm font-medium text-gray-600 capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}:
+                      </span>
+                      <p className="text-sm">{value}</p>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="description" className="mt-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="prose max-w-none">
-                  <p className="text-lg leading-relaxed mb-6">
-                    {product.description}
-                  </p>
-                  <h3 className="text-xl font-semibold mb-4">Características principais:</h3>
-                  <ul className="space-y-2">
-                    {product.specifications.map((spec, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-primary mt-1">✓</span>
-                        {spec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-12">
-                  <div className="text-4xl mb-4">⭐</div>
-                  <h3 className="text-xl font-semibold mb-2">Avaliações em breve</h3>
-                  <p className="text-muted-foreground">
-                    Sistema de avaliações será implementado em breve.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <section>
-            <h2 className="text-2xl font-bold mb-8">Produtos Relacionados</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard
-                  key={relatedProduct.id}
-                  product={relatedProduct}
-                  onAddToCart={handleAddToCart}
-                />
-              ))}
+              </div>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
       </div>
 
       <Footer />

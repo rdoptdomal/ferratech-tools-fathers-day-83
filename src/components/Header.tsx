@@ -28,13 +28,16 @@ interface Category {
   };
 }
 
-export default function Header() {
+interface HeaderProps {
+  cartItemsCount?: number;
+}
+
+export default function Header({ cartItemsCount = 0 }: HeaderProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cartItemsCount, setCartItemsCount] = useState(0);
 
   useEffect(() => {
     // Buscar categorias da API

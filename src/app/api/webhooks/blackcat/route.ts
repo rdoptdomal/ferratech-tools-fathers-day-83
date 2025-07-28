@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 const BLACKCAT_SECRET_KEY = 'sk_yfcQHXDMEaZ18y2eXfNNK6gARWHB28W1w2JCiGOJRF5ANlyT';
 
 export async function POST(request: NextRequest) {
@@ -63,8 +65,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Atualizar status do pedido baseado no webhook
-    let paymentStatus = 'PENDING';
-    let orderStatus = 'PENDING';
+    let paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | 'CANCELLED' = 'PENDING';
+    let orderStatus: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' = 'PENDING';
 
     switch (status) {
       case 'approved':

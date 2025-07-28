@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 interface CheckoutData {
   items: Array<{
     productId: string;
@@ -154,7 +156,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 9. Integração com BlackCat Pagamentos
-    const blackcatPayload = {
+    const blackcatPayload: any = {
       amount: Math.round(calculatedTotal * 100), // BlackCat usa centavos
       currency: 'BRL',
       payment_method: data.paymentMethod.toLowerCase(),

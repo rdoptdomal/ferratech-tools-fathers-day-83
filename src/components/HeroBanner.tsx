@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBanner from "@/assets/hero-banner.jpg";
@@ -22,7 +22,7 @@ const defaultSlides: BannerSlide[] = [
     subtitle: "ATÉ 50% OFF",
     description: "Ferramentas profissionais com qualidade superior. O presente perfeito para quem trabalha com as mãos!",
     ctaText: "Ver Ofertas",
-    backgroundImage: heroBanner,
+    backgroundImage: heroBanner.src,
   },
   {
     id: "2",
@@ -52,7 +52,7 @@ const HeroBanner = ({
   interval = 5000 
 }: HeroBannerProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!autoPlay) return;
@@ -104,7 +104,7 @@ const HeroBanner = ({
             variant="cta"
             size="xl"
             className="animate-fade-in animate-pulse-glow"
-            onClick={currentSlideData.ctaAction || (() => navigate('/products'))}
+            onClick={currentSlideData.ctaAction || (() => router.push('/products'))}
           >
             {currentSlideData.ctaText}
           </Button>

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ProductDetailProps): Promise<
         title: `${product.name} | FerraTech`,
         description: product.shortDescription || product.description,
         images: product.images,
-        type: 'product',
+        type: 'website',
       },
     };
   } catch (error) {

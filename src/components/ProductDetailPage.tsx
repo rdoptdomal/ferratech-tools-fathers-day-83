@@ -74,7 +74,7 @@ export default function ProductDetailPage({ slug }: ProductDetailPageProps) {
   };
 
   const handleVariationChange = (key: string, value: string) => {
-    setSelectedVariations(prev => ({
+    setSelectedVariations((prev: any) => ({
       ...prev,
       [key]: value
     }));
